@@ -73,6 +73,7 @@
     #t-vis:checked ~ .tab-nav label[for="t-vis"],
     #t-step:checked ~ .tab-nav label[for="t-step"],
     #t-3d:checked ~ .tab-nav label[for="t-3d"],
+    #t-gcolor:checked ~ .tab-nav label[for="t-gcolor"],
     #t-sheet:checked ~ .tab-nav label[for="t-sheet"],
     #t-guide:checked ~ .tab-nav label[for="t-guide"],
     #t-gloss:checked ~ .tab-nav label[for="t-gloss"],
@@ -93,6 +94,7 @@
     #t-vis:checked ~ #panel-vis,
     #t-step:checked ~ #panel-step,
     #t-3d:checked ~ #panel-3d,
+    #t-gcolor:checked ~ #panel-gcolor,
     #t-sheet:checked ~ #panel-sheet,
     #t-guide:checked ~ #panel-guide,
     #t-gloss:checked ~ #panel-gloss,
@@ -286,6 +288,43 @@
     }
     .tool-item { display: flex; align-items: center; gap: 6px; }
     .tool-item label { font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0; white-space: nowrap; }
+    
+    /* GUIDE WRAP COORDINATOR CARDS */
+    .guide-style-card {
+      background: #11141c;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 14px;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+      align-items: center;
+    }
+    @media (max-width: 820px) {
+      .guide-style-card { grid-template-columns: 1fr; }
+    }
+    .guide-canvas-box {
+      background: #080a0f;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .guide-info-box h3 { color: var(--accent-gold); font-size: 1rem; margin-bottom: 4px; }
+    .guide-info-box p { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; }
+    .recipe-list {
+      background: #0a0d14;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 0.78rem;
+      border: 1px solid #1f2735;
+      color: #00ffaa;
+      line-height: 1.5;
+    }
+
     .glossary-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -319,11 +358,7 @@
       border-color: var(--accent-gold);
       background: #181e2b;
     }
-    .thread-card-top {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .thread-card-top { display: flex; align-items: center; gap: 8px; }
     .thread-swatch {
       width: 30px;
       height: 30px;
@@ -374,7 +409,6 @@
       white-space: pre-wrap;
     }
     
-    /* PRINTABLE 1:1 TAPE STYLING */
     @media print {
       body * { visibility: hidden; }
       #printableTapeArea, #printableTapeArea * { visibility: visible; }
@@ -387,7 +421,7 @@
 <header>
   <div>
     <h1>THREAD STUDIO PRO</h1>
-    <p>VisualWRAP Engine • Spool Yardage Tracker • Spiral Guide Suite</p>
+    <p>VisualWRAP Engine • Guide Color Coordinator • Spiral Guide Suite</p>
   </div>
   <button type="button" class="btn btn-danger btn-sm" onclick="factoryResetApp()" style="width:auto;">🔴 Reset Defaults</button>
 </header>
@@ -395,6 +429,7 @@
 <input type="radio" name="main_tab" id="t-vis" class="tab-radio" checked />
 <input type="radio" name="main_tab" id="t-step" class="tab-radio" />
 <input type="radio" name="main_tab" id="t-3d" class="tab-radio" />
+<input type="radio" name="main_tab" id="t-gcolor" class="tab-radio" />
 <input type="radio" name="main_tab" id="t-sheet" class="tab-radio" />
 <input type="radio" name="main_tab" id="t-guide" class="tab-radio" />
 <input type="radio" name="main_tab" id="t-gloss" class="tab-radio" />
@@ -407,13 +442,14 @@
   <label for="t-vis" class="tab-label" onclick="syncAllEngines()">1. Pattern Visualizer</label>
   <label for="t-step" class="tab-label" onclick="syncAllEngines()">2. 🎬 Animated Workbench</label>
   <label for="t-3d" class="tab-label" onclick="syncAllEngines()">3. 🌐 3D Rod Simulator</label>
-  <label for="t-sheet" class="tab-label" onclick="generateWrapSheet()">4. 📋 Wrap Instruction Sheet</label>
-  <label for="t-guide" class="tab-label" onclick="calculateGuideSpacing()">5. 🎣 Guide & Spiral Wrap</label>
-  <label for="t-gloss" class="tab-label" onclick="syncAllEngines()">6. 📖 Thread Glossary</label>
-  <label for="t-imp" class="tab-label" onclick="syncAllEngines()">7. VisualWRAP Import</label>
-  <label for="t-lib" class="tab-label" onclick="syncAllEngines()">8. Thread Inventory & Spools</label>
-  <label for="t-lay" class="tab-label" onclick="syncAllEngines()">9. Taper & 1:1 Scale Tape</label>
-  <label for="t-vws" class="tab-label" onclick="syncAllEngines()">10. Export Script</label>
+  <label for="t-gcolor" class="tab-label" onclick="renderGuideColorCoordinator()">4. 🎨 Guide Color Schemes</label>
+  <label for="t-sheet" class="tab-label" onclick="generateWrapSheet()">5. 📋 Wrap Instruction Sheet</label>
+  <label for="t-guide" class="tab-label" onclick="calculateGuideSpacing()">6. 🎣 Guide & Spiral Spacing</label>
+  <label for="t-gloss" class="tab-label" onclick="syncAllEngines()">7. 📖 Thread Glossary</label>
+  <label for="t-imp" class="tab-label" onclick="syncAllEngines()">8. VisualWRAP Import</label>
+  <label for="t-lib" class="tab-label" onclick="syncAllEngines()">9. Thread Inventory & Spools</label>
+  <label for="t-lay" class="tab-label" onclick="syncAllEngines()">10. Taper & 1:1 Scale Tape</label>
+  <label for="t-vws" class="tab-label" onclick="syncAllEngines()">11. Export Script</label>
 </div>
 
 <!-- TAB 1: VISUALIZER -->
@@ -473,7 +509,6 @@
           </div>
         </div>
 
-        <!-- 1-CLICK PALETTE SHUFFLE BUTTONS -->
         <div style="margin-top:8px;">
           <label>1-Click House Colorway Presets</label>
           <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;">
@@ -510,7 +545,7 @@
   </div>
 </div>
 
-<!-- TAB 2: ANIMATED WORKBENCH WITH GIANT TOUCH CONTROL -->
+<!-- TAB 2: ANIMATED WORKBENCH -->
 <div id="panel-step" class="tab-panel">
   <div class="step-banner">
     <div class="step-info" style="flex: 1 1 100%;">
@@ -531,7 +566,6 @@
         <button type="button" class="btn btn-outline btn-sm" onclick="stepAll()">⏭ Complete</button>
       </div>
       
-      <!-- GIANT BENCH TOUCH BUTTON -->
       <button type="button" class="btn-giant" onclick="stepNext()" style="width: 100%;">
         👉 NEXT THREAD (TAP ANYWHERE)
       </button>
@@ -596,7 +630,18 @@
   </div>
 </div>
 
-<!-- TAB 4: WRAP INSTRUCTION SHEET -->
+<!-- TAB 4: COLOR-COORDINATED GUIDE WRAPS -->
+<div id="panel-gcolor" class="tab-panel">
+  <div class="card">
+    <h2>🎨 Color-Coordinated Guide Wrap Recipes (Synced to Active Wrap Palette)</h2>
+    <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:14px;">
+      These guide foot wrap patterns automatically match the primary, accent, metallic, and border colors from your active cross-wrap design:
+    </p>
+    <div id="guideColorSchemesList"></div>
+  </div>
+</div>
+
+<!-- TAB 5: WRAP INSTRUCTION SHEET -->
 <div id="panel-sheet" class="tab-panel">
   <div class="card">
     <h2>
@@ -607,7 +652,7 @@
   </div>
 </div>
 
-<!-- TAB 5: GUIDE LAYOUT & SPIRAL WRAP CALCULATOR -->
+<!-- TAB 6: GUIDE LAYOUT & SPIRAL WRAP CALCULATOR -->
 <div id="panel-guide" class="tab-panel">
   <div class="grid-layout">
     <div class="card">
@@ -643,11 +688,11 @@
       </div>
       <div class="row-2">
         <div class="form-group">
-          <label>Distance to First Guide (Butt/Stripper)</label>
+          <label>Distance to Stripper Guide</label>
           <input type="number" id="distToStripper" value="21.0" step="0.5" oninput="calculateGuideSpacing()" />
         </div>
         <div class="form-group">
-          <label>Tip-to-Choker Spacing</label>
+          <label>Tip-to-Choker Spacing (Guide 1)</label>
           <input type="number" id="tipToFirstGuide" value="4.0" step="0.25" oninput="calculateGuideSpacing()" />
         </div>
       </div>
@@ -660,7 +705,7 @@
   </div>
 </div>
 
-<!-- TAB 6: GLOSSARY -->
+<!-- TAB 7: GLOSSARY -->
 <div id="panel-gloss" class="tab-panel">
   <div class="card">
     <h2>📖 Rod Wrap Terminology & Pattern Glossary</h2>
@@ -685,7 +730,7 @@
   </div>
 </div>
 
-<!-- TAB 7: VISUALWRAP IMPORTER -->
+<!-- TAB 8: VISUALWRAP IMPORTER -->
 <div id="panel-imp" class="tab-panel">
   <div class="grid-layout">
     <div>
@@ -722,7 +767,7 @@
   </div>
 </div>
 
-<!-- TAB 8: THREAD INVENTORY & LIVE SPOOL METERS -->
+<!-- TAB 9: THREAD INVENTORY & LIVE SPOOL METERS -->
 <div id="panel-lib" class="tab-panel">
   <div class="card">
     <h2>➕ Add Custom Spool</h2>
@@ -797,7 +842,7 @@
   </div>
 </div>
 
-<!-- TAB 9: TAPER & 1:1 PRINTABLE SCALE RULER TAPE -->
+<!-- TAB 10: TAPER & 1:1 PRINTABLE SCALE RULER TAPE -->
 <div id="panel-lay" class="tab-panel">
   <div class="grid-layout">
     <div class="card">
@@ -853,7 +898,7 @@
   </div>
 </div>
 
-<!-- TAB 10: VISUALWRAP EXPORT -->
+<!-- TAB 11: VISUALWRAP EXPORT -->
 <div id="panel-vws" class="tab-panel">
   <div class="card">
     <h2>VisualWRAP Formatted Script Export</h2>
@@ -862,7 +907,6 @@
   </div>
 </div>
 
-<!-- HIDDEN PRINTABLE 1:1 TAPE CANVAS CONTAINER -->
 <div id="printableTapeArea" style="display:none;"></div>
 
 <script>
@@ -1034,14 +1078,13 @@ const DEFAULT_PATTERNS = [
   }
 ];
 
-const STORAGE_PREFIX = "tsp_master_v13_";
+const STORAGE_PREFIX = "tsp_master_v14_";
 let customShopSpools = [];
 let masterThreadCatalog = [...DEFAULT_CATALOG];
 let ownedThreads = [
   "fj_m901", "fj_014", "pw_440", "fj_002", "fj_503", "fj_504", "fj_m902", "fj_m908", "fj_m024", "fj_m035", "pw_9600", "pw_9620", "gb_206", "gb_326"
 ];
 
-// SPOOL YARDAGE CAPACITY INVENTORY DICTIONARY (Default 100 Yds)
 let spoolCapacities = {};
 ownedThreads.forEach(id => { spoolCapacities[id] = 100; });
 
@@ -1104,6 +1147,7 @@ function syncAllEngines() {
   generateWrapSheet();
   calculateLayout();
   renderThreadLibrary();
+  renderGuideColorCoordinator();
 }
 
 function updateScalingIndicators() {
@@ -1930,6 +1974,160 @@ function reset3DAngle() {
   draw3DRod();
 }
 
+// 🎨 COLOR-COORDINATED GUIDE WRAP ENGINE
+function renderGuideColorCoordinator() {
+  const container = document.getElementById('guideColorSchemesList');
+  if (!container) return;
+
+  // Extract unique colors from current pattern
+  const activeColorIds = [...new Set(layers.map(l => l.threadId))];
+  const c1 = getThreadInfo(activeColorIds[0] || "fj_002"); // Base / Main Body
+  const c2 = getThreadInfo(activeColorIds[1] || "fj_m901"); // Accent 1 / Inlay
+  const c3 = getThreadInfo(activeColorIds[2] || activeColorIds[0] || "pw_440"); // Accent 2 / Pinline
+  const c4 = getThreadInfo(activeColorIds[3] || activeColorIds[1] || "fj_m902"); // Accent 3 / Tipping
+
+  const schemes = [
+    {
+      title: "Scheme A: Classic Single Inlay (Clean & Balanced)",
+      desc: "Ideal for all running guides. Solid base color with a 3-turn metallic trim band.",
+      recipe: `1. Start ${c1.name} (Base), wrap 10 turns up the guide foot.<br/>2. Insert inlay loop of ${c2.name} (Trim), wrap 3 tight turns.<br/>3. Continue ${c1.name} for 20 turns to guide transition. Tie off.`,
+      bands: [
+        { color: c1.hex, width: 30 },
+        { color: c2.hex, width: 10 },
+        { color: c1.hex, width: 60 }
+      ]
+    },
+    {
+      title: "Scheme B: Double Metallic Split Inlay (Tournament Series)",
+      desc: "Perfect for stripper and reduction guides. Features dual pinline borders framing an accent center.",
+      recipe: `1. Start ${c1.name}, wrap 8 turns.<br/>2. Lay 2 turns ${c2.name} (Pinline 1).<br/>3. Lay 6 turns ${c3.name} (Center Inlay).<br/>4. Lay 2 turns ${c2.name} (Pinline 2).<br/>5. Finish with ${c1.name} over guide foot.`,
+      bands: [
+        { color: c1.hex, width: 25 },
+        { color: c2.hex, width: 6 },
+        { color: c3.hex, width: 22 },
+        { color: c2.hex, width: 6 },
+        { color: c1.hex, width: 41 }
+      ]
+    },
+    {
+      title: "Scheme C: Metallic Tip-Off & Center Band (Custom Inshore)",
+      desc: "Features 5-turn metallic tipping at the start of the guide foot with a matching center accent ring.",
+      recipe: `1. Start ${c2.name} (Metallic), wrap 5 turns tipping.<br/>2. Transition to ${c1.name}, wrap 14 turns.<br/>3. Insert ${c3.name} 4-turn center band.<br/>4. Finish ${c1.name} over guide heel.`,
+      bands: [
+        { color: c2.hex, width: 14 },
+        { color: c1.hex, width: 35 },
+        { color: c3.hex, width: 12 },
+        { color: c1.hex, width: 39 }
+      ]
+    },
+    {
+      title: "Scheme D: 3-Tone Stacked Gradient (Full Pattern Match)",
+      desc: "Replicates the multi-layer fade of your diamond cross wrap across the guide wrap foot.",
+      recipe: `1. Start ${c1.name} (12 turns) ➔ 2. Wrap ${c2.name} (6 turns) ➔ 3. Wrap ${c3.name} (6 turns) ➔ 4. Wrap ${c4.name} (6 turns) ➔ 5. Finish with ${c1.name}.`,
+      bands: [
+        { color: c1.hex, width: 25 },
+        { color: c2.hex, width: 15 },
+        { color: c3.hex, width: 15 },
+        { color: c4.hex, width: 15 },
+        { color: c1.hex, width: 30 }
+      ]
+    }
+  ];
+
+  let html = "";
+  schemes.forEach((s, idx) => {
+    html += `
+      <div class="guide-style-card">
+        <div class="guide-canvas-box">
+          <canvas id="gCanvas_${idx}" width="300" height="90"></canvas>
+        </div>
+        <div class="guide-info-box">
+          <h3>${s.title}</h3>
+          <p>${s.desc}</p>
+          <div class="recipe-list">
+            <strong>Winding Recipe:</strong><br/>
+            ${s.recipe}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+
+  container.innerHTML = html;
+
+  // Draw 2D simulated guide feet for each scheme
+  schemes.forEach((s, idx) => {
+    const cvs = document.getElementById(`gCanvas_${idx}`);
+    if (!cvs) return;
+    const ctx = cvs.getContext('2d');
+    const w = cvs.width;
+    const h = cvs.height;
+
+    ctx.fillStyle = "#080a0f";
+    ctx.fillRect(0, 0, w, h);
+
+    const blankY = h / 2;
+    const blankH = 26;
+
+    // 1. Draw Blank Section
+    const bGrad = ctx.createLinearGradient(0, blankY - blankH/2, 0, blankY + blankH/2);
+    bGrad.addColorStop(0, adjustBrightness(activeBlankColor, -35));
+    bGrad.addColorStop(0.5, adjustBrightness(activeBlankColor, 25));
+    bGrad.addColorStop(1, adjustBrightness(activeBlankColor, -60));
+    ctx.fillStyle = bGrad;
+    ctx.fillRect(10, blankY - blankH/2, w - 20, blankH);
+
+    // 2. Draw Simulated Guide Foot (Silver/Titanium Frame)
+    ctx.fillStyle = "#a8b2c1";
+    ctx.beginPath();
+    ctx.moveTo(w - 70, blankY - blankH/2 - 4);
+    ctx.lineTo(w - 30, blankY - blankH/2 - 20); // Guide Leg
+    ctx.lineTo(w - 20, blankY - blankH/2 - 20);
+    ctx.lineTo(w - 55, blankY - blankH/2 - 2);
+    ctx.lineTo(60, blankY - blankH/2 - 2); // Guide Foot
+    ctx.lineTo(55, blankY - blankH/2);
+    ctx.lineTo(w - 65, blankY - blankH/2);
+    ctx.closePath();
+    ctx.fill();
+
+    // 3. Draw Color Bands on Top of Guide Foot (Thread Wrap)
+    let currentX = 40;
+    const wrapW = 200;
+    const wrapY = blankY - blankH/2 - 2;
+    const wrapH = blankH + 4;
+
+    s.bands.forEach(band => {
+      const bWidth = (band.width / 100) * wrapW;
+      const tGrad = ctx.createLinearGradient(0, wrapY, 0, wrapY + wrapH);
+      tGrad.addColorStop(0, adjustBrightness(band.color, 25));
+      tGrad.addColorStop(0.5, band.color);
+      tGrad.addColorStop(1, adjustBrightness(band.color, -45));
+      ctx.fillStyle = tGrad;
+      ctx.fillRect(currentX, wrapY, bWidth, wrapH);
+
+      // Thread individual ridges
+      ctx.strokeStyle = "rgba(0,0,0,0.15)";
+      ctx.lineWidth = 1;
+      for (let rx = currentX; rx < currentX + bWidth; rx += 4) {
+        ctx.beginPath();
+        ctx.moveTo(rx, wrapY);
+        ctx.lineTo(rx, wrapY + wrapH);
+        ctx.stroke();
+      }
+      currentX += bWidth;
+    });
+
+    // 4. Clear Epoxy Gloss Coat
+    const eGrad = ctx.createLinearGradient(0, wrapY, 0, wrapY + wrapH);
+    eGrad.addColorStop(0, "rgba(255,255,255,0.4)");
+    eGrad.addColorStop(0.2, "rgba(255,255,255,0.1)");
+    eGrad.addColorStop(0.8, "rgba(0,0,0,0.2)");
+    eGrad.addColorStop(1, "rgba(0,0,0,0.6)");
+    ctx.fillStyle = eGrad;
+    ctx.fillRect(40, wrapY, wrapW, wrapH);
+  });
+}
+
 // GUIDE LAYOUT & SPIRAL ACID WRAP CALCULATOR
 function calculateGuideSpacing() {
   const container = document.getElementById('guideResults');
@@ -1945,7 +2143,6 @@ function calculateGuideSpacing() {
   let rodLenInches = rLen * (unit === 'ft' ? 12 : (unit === 'mm' ? 0.03937 : 1));
   const workingLength = rodLenInches - distStripper - tipFirst;
 
-  // Progressive deflection formula (2-variable progressive spacing)
   let intervals = [];
   let sumFactors = 0;
   for (let i = 1; i < numGuides; i++) sumFactors += Math.pow(1.18, i);
@@ -1958,7 +2155,6 @@ function calculateGuideSpacing() {
     const step = baseStep * Math.pow(1.18, i);
     currentDist += step;
     
-    // Calculate spiral rotation angle per guide
     let angleStr = "0° (Top)";
     if (style === 'SPIRAL_SIMPLE') {
       if (i === numGuides - 1) angleStr = "0° (Stripper/Butt)";
@@ -2062,7 +2258,6 @@ function calculateThreadConsumption() {
   const consumptionPerSpool = {};
 
   layers.forEach(layer => {
-    // Total inches = Single pass length * 2 (Forward+Return) * Passes * Repeats
     const inchesUsed = singleHelicalInch * 2 * layer.passes * reps;
     const yardsUsed = inchesUsed / 36;
     consumptionPerSpool[layer.threadId] = (consumptionPerSpool[layer.threadId] || 0) + yardsUsed;
