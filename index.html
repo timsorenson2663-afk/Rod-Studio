@@ -226,7 +226,6 @@
     .step-info h3 { font-size: 1.05rem; color: var(--accent-gold); margin-bottom: 3px; }
     .step-info p { font-size: 0.8rem; color: var(--text-muted); }
     
-    /* LIVE WAYPOINT TELEMETRY HUD */
     .waypoint-hud {
       background: #0b0e14;
       border: 1px solid var(--accent-cyan);
@@ -341,7 +340,7 @@
 <header>
   <div>
     <h1>THREAD STUDIO PRO</h1>
-    <p>VisualWRAP Architecture • Auto-Axis Detection • Helical Waypoint Engine</p>
+    <p>VisualWRAP Architecture • Auto-Synced Taper & Layout Engine</p>
   </div>
   <button type="button" class="btn btn-danger btn-sm" onclick="factoryResetApp()" style="width:auto;">🔴 Reset Defaults</button>
 </header>
@@ -403,8 +402,8 @@
 
         <div class="row-3">
           <div class="form-group">
-            <label>Repeats</label>
-            <input type="number" id="repeats" value="4" min="1" max="10" onchange="syncAllEngines()" />
+            <label>Repeats (Crosses)</label>
+            <input type="number" id="repeats" value="4" min="1" max="15" onchange="syncAllEngines()" />
           </div>
           <div class="form-group">
             <label>Pattern Length</label>
@@ -444,14 +443,13 @@
   </div>
 </div>
 
-<!-- TAB 2: ANIMATED WORKBENCH WITH LIVE WAYPOINT TELEMETRY -->
+<!-- TAB 2: ANIMATED WORKBENCH -->
 <div id="panel-step" class="tab-panel">
   <div class="step-banner">
     <div class="step-info" style="flex: 1 1 100%;">
       <h3 id="stepHeader">Step 0 of 0: Ready to Wrap</h3>
       <p id="stepSubtext">Click "Play Slow Motion" or "Next Thread" to start laying down threads.</p>
       
-      <!-- REAL-TIME HUD TELEMETRY -->
       <div class="waypoint-hud" id="waypointHud">
         <span class="badge">READY</span> Select a thread to calculate active start point, helical rotation, and axial crossing marks.
       </div>
@@ -524,7 +522,7 @@
   </div>
 </div>
 
-<!-- TAB 4: WRAP INSTRUCTION SHEET & AXIAL WAYPOINT ROUTING GUIDE -->
+<!-- TAB 4: WRAP INSTRUCTION SHEET -->
 <div id="panel-sheet" class="tab-panel">
   <div class="card">
     <h2>
@@ -560,7 +558,7 @@
   </div>
 </div>
 
-<!-- TAB 6: VISUALWRAP IMPORTER WITH UNIVERSAL FORMAT SUPPORT -->
+<!-- TAB 6: VISUALWRAP IMPORTER -->
 <div id="panel-imp" class="tab-panel">
   <div class="grid-layout">
     <div>
@@ -672,11 +670,17 @@
   </div>
 </div>
 
-<!-- TAB 8: TAPER -->
+<!-- TAB 8: TAPER (AUTO-SYNCED TO DESIGNER) -->
 <div id="panel-lay" class="tab-panel">
   <div class="grid-layout">
     <div class="card">
-      <h2>Blank Taper Settings</h2>
+      <h2>
+        <span>Blank Taper Settings</span>
+        <label style="display:inline-flex; align-items:center; gap:6px; font-size:0.75rem; color:var(--accent-gold); cursor:pointer; margin-bottom:0;">
+          <input type="checkbox" id="syncWithDesigner" checked onchange="toggleSyncMode(this.checked)" style="width:16px; height:16px;" />
+          🔗 Auto-Sync with Pattern Designer
+        </label>
+      </h2>
       <div class="row-2">
         <div class="form-group">
           <label>Units</label>
@@ -706,9 +710,10 @@
         </div>
       </div>
       <div class="form-group">
-        <label>Pattern Cross Count</label>
-        <input type="number" id="targetCrosses" value="5" min="2" max="15" oninput="calculateLayout()" />
+        <label>Pattern Cross Count (Repeats)</label>
+        <input type="number" id="targetCrosses" value="4" min="1" max="15" oninput="calculateLayout()" />
       </div>
+      <div id="taperSummaryBadge" style="background:#0c0f16; border:1px solid var(--border-color); border-radius:6px; padding:10px; font-size:0.8rem; color:var(--accent-gold);"></div>
     </div>
 
     <div class="card">
@@ -995,7 +1000,7 @@ const DEFAULT_PATTERNS = [
   }
 ];
 
-const STORAGE_PREFIX = "tsp_master_v10_";
+const STORAGE_PREFIX = "tsp_master_v11_";
 let customShopSpools = [];
 let masterThreadCatalog = [...DEFAULT_CATALOG];
 let ownedThreads = [
@@ -1056,6 +1061,7 @@ function syncAllEngines() {
   draw3DRod();
   updateVisualWrapScript();
   generateWrapSheet();
+  calculateLayout();
 }
 
 function updateScalingIndicators() {
@@ -1524,7 +1530,6 @@ function renderStepCanvas() {
     if (headEl) headEl.innerHTML = `<span style="color:${thread.hex}; font-size:1.2rem;">■</span> Step ${currentStepIndex} of ${flattenedThreadSteps.length}: ${thread.name}`;
     if (subEl) subEl.textContent = `Band #${active.layerIndex + 1} • Thread ${active.threadNumInPass} of ${active.totalInPass} • Geometry: ${active.geo} (${active.type})`;
 
-    // CALCULATE PRECISE AXIAL ROUTE TELEMETRY
     let pt1 = `0° (0.00${unit})`;
     let pt2 = `90° (${(axDist * 1).toFixed(2)}${unit})`;
     let pt3 = `180° (${(axDist * 2).toFixed(2)}${unit})`;
@@ -1883,7 +1888,6 @@ function generateWrapSheet() {
   layers.forEach((l, idx) => {
     const thread = getThreadInfo(l.threadId);
     
-    // Helical Waypoint Progression String
     let routeDesc = "";
     if (axis === 4) {
       routeDesc = `
@@ -1915,14 +1919,49 @@ function generateWrapSheet() {
   container.innerHTML = html;
 }
 
-// TAPER CALCULATOR
+// TAPER CALCULATOR WITH TWO-WAY AUTO-SYNC
+function toggleSyncMode(isSynced) {
+  const crossesInput = document.getElementById('targetCrosses');
+  const unitSelect = document.getElementById('calcUnit');
+  const axisSelect = document.getElementById('axisCount');
+
+  if (isSynced) {
+    if (crossesInput) crossesInput.disabled = true;
+    if (unitSelect) unitSelect.disabled = true;
+    if (axisSelect) axisSelect.disabled = true;
+    calculateLayout();
+  } else {
+    if (crossesInput) crossesInput.disabled = false;
+    if (unitSelect) unitSelect.disabled = false;
+    if (axisSelect) axisSelect.disabled = false;
+  }
+}
+
 function calculateLayout() {
   const results = document.getElementById('layoutResults');
   if (!results) return;
+
+  const isSynced = document.getElementById('syncWithDesigner')?.checked ?? true;
+
+  // Auto-sync values from Tab 1 if enabled
+  if (isSynced) {
+    const designerReps = document.getElementById('repeats')?.value || 4;
+    const designerUnit = document.getElementById('wrapUnit')?.value || 'in';
+    const designerAxis = document.getElementById('patternAxis')?.value || 4;
+
+    const cInput = document.getElementById('targetCrosses');
+    const uInput = document.getElementById('calcUnit');
+    const aInput = document.getElementById('axisCount');
+
+    if (cInput) { cInput.value = designerReps; cInput.disabled = true; }
+    if (uInput) { uInput.value = designerUnit; uInput.disabled = true; }
+    if (aInput) { aInput.value = designerAxis; aInput.disabled = true; }
+  }
+
   const unit = document.getElementById('calcUnit')?.value || 'in';
-  const buttD = parseFloat(document.getElementById('buttDiam')?.value || 0.5);
-  const tipD = parseFloat(document.getElementById('tipDiam')?.value || 0.4);
-  const crosses = parseInt(document.getElementById('targetCrosses')?.value || 5);
+  const buttD = parseFloat(document.getElementById('buttDiam')?.value || 0.520);
+  const tipD = parseFloat(document.getElementById('tipDiam')?.value || 0.410);
+  const crosses = parseInt(document.getElementById('targetCrosses')?.value || 4);
   const axis = parseInt(document.getElementById('axisCount')?.value || 4);
 
   const buttCirc = buttD * Math.PI;
@@ -1937,7 +1976,7 @@ function calculateLayout() {
     </table>
     <h3 style="font-size:0.85rem; color:var(--accent-gold); margin-bottom:6px;">Progressive Taper Axis Marks (${axis}-Axis)</h3>
     <table>
-      <tr><th>Cross #</th><th>Interval</th><th>Cumulative</th><th>Axis Offset</th></tr>
+      <tr><th>Cross #</th><th>Interval Spacing</th><th>Cumulative Distance</th><th>Axis Offset (${axis} Axis)</th></tr>
   `;
 
   let cumDist = 0;
@@ -1955,6 +1994,14 @@ function calculateLayout() {
   }
   html += `</table>`;
   results.innerHTML = html;
+
+  const badge = document.getElementById('taperSummaryBadge');
+  if (badge) {
+    badge.innerHTML = `
+      Progressive Taper Total Length: <strong>${cumDist.toFixed(3)} ${unit}</strong> over <strong>${crosses} Crosses</strong><br/>
+      <span style="font-size:0.75rem; color:var(--text-muted);">Calculated using Dale Clemens Progressive Diminishing Spacing Formula.</span>
+    `;
+  }
 }
 
 // EXPORT VISUALWRAP SCRIPT
@@ -2127,20 +2174,18 @@ function parseAndSaveVisualWrapScript() {
     } else if (fullUpper.includes("2-AXIS") || fullUpper.includes("CHEVRON SINGLE")) {
       detectedAxis = 2;
     } else {
-      detectedAxis = 4; // Industry Standard Default
+      detectedAxis = 4;
     }
   }
 
-  // 3. Extract Wrapping Passes Across All Known INI, Numeric, and Keyword Syntaxes
+  // 3. Extract Wrapping Passes Across All Known Syntaxes
   lines.forEach(line => {
     let clean = line.trim();
     if (!clean) return;
 
-    // Strip comments
     clean = clean.split(';')[0].split('//')[0].split('#')[0].trim();
     if (!clean) return;
 
-    // Check INI format: T1=... or Pass1=...
     if (clean.includes('=')) {
       const parts = clean.split('=');
       const key = parts[0].trim().toUpperCase();
@@ -2168,7 +2213,6 @@ function parseAndSaveVisualWrapScript() {
 
     const firstTok = tokens[0];
 
-    // Named Geometry Keyword
     if (["CROSS", "BOX", "CHEVRON", "OFFSET", "DIAMOND", "STAR", "WRAP", "IN", "OUT"].includes(firstTok)) {
       isValid = true;
       if (firstTok === "BOX") geo = "BOX";
@@ -2185,9 +2229,7 @@ function parseAndSaveVisualWrapScript() {
           passes = parseInt(tok);
         }
       });
-    }
-    // Numeric Parameters
-    else {
+    } else {
       const numbers = tokens.map(t => parseInt(t.replace(/\D/g, ''))).filter(n => !isNaN(n));
       if (numbers.length >= 2) {
         isValid = true;
@@ -2252,7 +2294,6 @@ function parseAndSaveVisualWrapScript() {
   currentPatternTitle = newPattern.name;
   layers = JSON.parse(JSON.stringify(newPattern.layers));
   
-  // Set detected Axis automatically
   const axEl = document.getElementById('patternAxis');
   if (axEl) axEl.value = newPattern.axis;
 
@@ -2260,7 +2301,6 @@ function parseAndSaveVisualWrapScript() {
   renderLayersUI();
   syncAllEngines();
 
-  // Switch to Tab 2 to preview animation immediately
   const stepRadio = document.getElementById('t-step');
   if (stepRadio) stepRadio.checked = true;
 
@@ -2340,6 +2380,7 @@ function initApp() {
     });
   }
 
+  toggleSyncMode(true);
   renderPatternLibraryList();
   renderLayersUI();
   renderThreadLibrary();
