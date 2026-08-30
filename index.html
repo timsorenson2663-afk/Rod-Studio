@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Thread Studio Pro - VisualWRAP Engine</title>
+  <title>Thread Studio Pro - VisualWRAP & Custom Rod Suite</title>
   <style>
     :root {
-      --bg-dark: #10131a;
-      --card-bg: #181d28;
-      --border-color: #2b3345;
+      --bg-dark: #0e1117;
+      --card-bg: #161b26;
+      --border-color: #273142;
       --accent-gold: #d4af37;
       --accent-cyan: #00d2ff;
       --accent-purple: #9d4edd;
       --text-main: #f0f4f8;
       --text-muted: #8e9bb0;
-      --input-bg: #0d1017;
+      --input-bg: #0b0e14;
       --btn-hover: #e5c358;
     }
     * {
@@ -31,7 +31,7 @@
       padding-bottom: 60px;
     }
     header {
-      background: linear-gradient(135deg, #181d28 0%, #0d1017 100%);
+      background: linear-gradient(135deg, #181d28 0%, #0a0d14 100%);
       border-bottom: 2px solid var(--accent-gold);
       padding: 12px 18px;
       display: flex;
@@ -53,7 +53,7 @@
     .tab-radio { display: none; }
     .tab-nav {
       display: flex;
-      background: #0b0e14;
+      background: #080a0f;
       border-bottom: 1px solid var(--border-color);
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
@@ -74,6 +74,7 @@
     #t-step:checked ~ .tab-nav label[for="t-step"],
     #t-3d:checked ~ .tab-nav label[for="t-3d"],
     #t-sheet:checked ~ .tab-nav label[for="t-sheet"],
+    #t-guide:checked ~ .tab-nav label[for="t-guide"],
     #t-gloss:checked ~ .tab-nav label[for="t-gloss"],
     #t-imp:checked ~ .tab-nav label[for="t-imp"],
     #t-lib:checked ~ .tab-nav label[for="t-lib"],
@@ -93,6 +94,7 @@
     #t-step:checked ~ #panel-step,
     #t-3d:checked ~ #panel-3d,
     #t-sheet:checked ~ #panel-sheet,
+    #t-guide:checked ~ #panel-guide,
     #t-gloss:checked ~ #panel-gloss,
     #t-imp:checked ~ #panel-imp,
     #t-lib:checked ~ #panel-lib,
@@ -175,6 +177,20 @@
     .btn-outline:hover { background: rgba(0, 210, 255, 0.1); }
     .btn-sm { padding: 6px 10px; font-size: 0.78rem; width: auto; }
     .btn-danger { background: #e63946; color: #fff; }
+    .btn-giant {
+      padding: 16px 20px;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%);
+      color: #000;
+      border-radius: 8px;
+      border: none;
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.35);
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .btn-giant:active { transform: scale(0.98); }
     .canvas-wrapper {
       background: #080a0f;
       border: 1px solid var(--border-color);
@@ -193,7 +209,7 @@
       box-shadow: 0 4px 15px rgba(0,0,0,0.4);
     }
     .layer-item {
-      background: #12151f;
+      background: #11141c;
       border: 1px solid var(--border-color);
       border-radius: 6px;
       padding: 10px;
@@ -212,7 +228,7 @@
       flex-shrink: 0;
     }
     .step-banner {
-      background: #141824;
+      background: #131722;
       border: 1px solid var(--accent-gold);
       border-radius: 8px;
       padding: 14px;
@@ -227,7 +243,7 @@
     .step-info p { font-size: 0.8rem; color: var(--text-muted); }
     
     .waypoint-hud {
-      background: #0b0e14;
+      background: #080a0f;
       border: 1px solid var(--accent-cyan);
       border-radius: 6px;
       padding: 12px 14px;
@@ -255,14 +271,13 @@
       color: #00ffaa;
       font-weight: 600;
     }
-
     .step-controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
     .step-controls .btn { width: auto; min-width: 80px; }
     .custom-tool-bar {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
-      background: #0b0e14;
+      background: #080a0f;
       padding: 8px 12px;
       border-radius: 6px;
       border: 1px solid var(--border-color);
@@ -278,7 +293,7 @@
       margin-top: 10px;
     }
     .glossary-card {
-      background: #12151f;
+      background: #11141c;
       border: 1px solid var(--border-color);
       border-radius: 6px;
       padding: 12px;
@@ -287,22 +302,27 @@
     .glossary-card p { font-size: 0.8rem; color: var(--text-muted); }
     .thread-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       gap: 10px;
       margin-top: 12px;
     }
     .thread-card {
-      background: #12151f;
+      background: #11141c;
       border: 1px solid var(--border-color);
       border-radius: 6px;
       padding: 8px 10px;
       display: flex;
-      align-items: center;
-      gap: 8px;
+      flex-direction: column;
+      gap: 6px;
     }
     .thread-card.owned {
       border-color: var(--accent-gold);
-      background: #1a2030;
+      background: #181e2b;
+    }
+    .thread-card-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
     .thread-swatch {
       width: 30px;
@@ -315,8 +335,20 @@
     .thread-info .brand-tag { font-size: 0.65rem; color: var(--accent-gold); font-weight: bold; }
     .thread-info .thread-name { font-size: 0.78rem; font-weight: 600; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .thread-info .thread-code { font-size: 0.72rem; color: var(--text-muted); }
+    .thread-meter-bar {
+      width: 100%;
+      height: 5px;
+      background: #080a0f;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .thread-meter-fill {
+      height: 100%;
+      background: var(--accent-cyan);
+      transition: width 0.3s;
+    }
     .pattern-card {
-      background: #12151f;
+      background: #11141c;
       border: 1px solid var(--border-color);
       border-radius: 6px;
       padding: 12px;
@@ -329,10 +361,10 @@
     .pattern-card p { font-size: 0.72rem; color: var(--text-muted); }
     table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 0.82rem; }
     th, td { border: 1px solid var(--border-color); padding: 7px 9px; text-align: left; }
-    th { background: #11141c; color: var(--accent-gold); }
-    tr:nth-child(even) { background: #141824; }
+    th { background: #0c0f16; color: var(--accent-gold); }
+    tr:nth-child(even) { background: #131722; }
     pre {
-      background: #090b10;
+      background: #080a0f;
       border: 1px solid var(--border-color);
       color: #00ffaa;
       padding: 12px;
@@ -341,6 +373,13 @@
       font-size: 0.82rem;
       white-space: pre-wrap;
     }
+    
+    /* PRINTABLE 1:1 TAPE STYLING */
+    @media print {
+      body * { visibility: hidden; }
+      #printableTapeArea, #printableTapeArea * { visibility: visible; }
+      #printableTapeArea { position: absolute; left: 0; top: 0; width: 100%; background: #fff; color: #000; padding: 20px; }
+    }
   </style>
 </head>
 <body>
@@ -348,7 +387,7 @@
 <header>
   <div>
     <h1>THREAD STUDIO PRO</h1>
-    <p>VisualWRAP Architecture • Auto-Synced Taper & Layout Engine</p>
+    <p>VisualWRAP Engine • Spool Yardage Tracker • Spiral Guide Suite</p>
   </div>
   <button type="button" class="btn btn-danger btn-sm" onclick="factoryResetApp()" style="width:auto;">🔴 Reset Defaults</button>
 </header>
@@ -357,6 +396,7 @@
 <input type="radio" name="main_tab" id="t-step" class="tab-radio" />
 <input type="radio" name="main_tab" id="t-3d" class="tab-radio" />
 <input type="radio" name="main_tab" id="t-sheet" class="tab-radio" />
+<input type="radio" name="main_tab" id="t-guide" class="tab-radio" />
 <input type="radio" name="main_tab" id="t-gloss" class="tab-radio" />
 <input type="radio" name="main_tab" id="t-imp" class="tab-radio" />
 <input type="radio" name="main_tab" id="t-lib" class="tab-radio" />
@@ -368,11 +408,12 @@
   <label for="t-step" class="tab-label" onclick="syncAllEngines()">2. 🎬 Animated Workbench</label>
   <label for="t-3d" class="tab-label" onclick="syncAllEngines()">3. 🌐 3D Rod Simulator</label>
   <label for="t-sheet" class="tab-label" onclick="generateWrapSheet()">4. 📋 Wrap Instruction Sheet</label>
-  <label for="t-gloss" class="tab-label" onclick="syncAllEngines()">5. 📖 Thread Glossary</label>
-  <label for="t-imp" class="tab-label" onclick="syncAllEngines()">6. VisualWRAP Import</label>
-  <label for="t-lib" class="tab-label" onclick="syncAllEngines()">7. Thread Inventory</label>
-  <label for="t-lay" class="tab-label" onclick="syncAllEngines()">8. Taper & Spacing</label>
-  <label for="t-vws" class="tab-label" onclick="syncAllEngines()">9. Export Script</label>
+  <label for="t-guide" class="tab-label" onclick="calculateGuideSpacing()">5. 🎣 Guide & Spiral Wrap</label>
+  <label for="t-gloss" class="tab-label" onclick="syncAllEngines()">6. 📖 Thread Glossary</label>
+  <label for="t-imp" class="tab-label" onclick="syncAllEngines()">7. VisualWRAP Import</label>
+  <label for="t-lib" class="tab-label" onclick="syncAllEngines()">8. Thread Inventory & Spools</label>
+  <label for="t-lay" class="tab-label" onclick="syncAllEngines()">9. Taper & 1:1 Scale Tape</label>
+  <label for="t-vws" class="tab-label" onclick="syncAllEngines()">10. Export Script</label>
 </div>
 
 <!-- TAB 1: VISUALIZER -->
@@ -380,10 +421,16 @@
   <div class="grid-layout">
     <div>
       <div class="card">
-        <h2>Pattern & Blank Scaling</h2>
+        <h2>
+          <span>Pattern & Blank Scaling</span>
+          <label style="display:inline-flex; align-items:center; gap:6px; font-size:0.75rem; color:var(--accent-cyan); cursor:pointer;">
+            <input type="checkbox" id="enableWeaveShadows" checked onchange="syncAllEngines()" style="width:16px; height:16px;" />
+            Under/Over Braid Shading
+          </label>
+        </h2>
         <div class="row-2">
           <div class="form-group">
-            <label>Axis Layout (Auto-Synced)</label>
+            <label>Axis Layout</label>
             <select id="patternAxis" onchange="syncAllEngines()">
               <option value="2">2-Axis (Top / Bottom 180°)</option>
               <option value="4" selected>4-Axis (0°, 90°, 180°, 270°)</option>
@@ -426,7 +473,19 @@
           </div>
         </div>
 
-        <div style="background:#0c0f16; border:1px solid var(--border-color); border-radius:6px; padding:10px; margin-top:6px;">
+        <!-- 1-CLICK PALETTE SHUFFLE BUTTONS -->
+        <div style="margin-top:8px;">
+          <label>1-Click House Colorway Presets</label>
+          <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="applyThemePalette('inshore')">🌾 Texas Inshore (Teal/Gold)</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="applyThemePalette('nordic')">⚔️ Nordic (Purple/Silver)</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="applyThemePalette('stealth')">🌑 Gunmetal/Navy</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="applyThemePalette('neon')">⚡ Hi-Vis Neon</button>
+            <button type="button" class="btn btn-outline btn-sm" onclick="applyThemePalette('random')">🎲 Random Shuffle</button>
+          </div>
+        </div>
+
+        <div style="background:#080a0f; border:1px solid var(--border-color); border-radius:6px; padding:10px; margin-top:10px;">
           <div id="scalingSummary" style="font-size:0.8rem; color:var(--accent-gold); font-weight:600;"></div>
           <div id="axisTickSummary" style="font-size:0.75rem; color:var(--text-muted); margin-top:3px;"></div>
         </div>
@@ -451,25 +510,31 @@
   </div>
 </div>
 
-<!-- TAB 2: ANIMATED WORKBENCH WITH CLEAR PLACEMENT CUES -->
+<!-- TAB 2: ANIMATED WORKBENCH WITH GIANT TOUCH CONTROL -->
 <div id="panel-step" class="tab-panel">
   <div class="step-banner">
     <div class="step-info" style="flex: 1 1 100%;">
       <h3 id="stepHeader">Step 0 of 0: Ready to Wrap</h3>
       <p id="stepSubtext">Click "Play Slow Motion" or "Next Thread" to start laying down threads.</p>
       
-      <!-- LIVE TELEMETRY HUD -->
       <div class="waypoint-hud" id="waypointHud">
         <span class="badge">READY</span> Select a thread to calculate active start point, helical rotation, and axial crossing marks.
       </div>
     </div>
     
-    <div class="step-controls" style="margin-top: 10px;">
-      <button type="button" class="btn btn-outline btn-sm" onclick="stepReset()">⏮ Reset</button>
-      <button type="button" class="btn btn-outline btn-sm" onclick="stepPrev()">◀ Prev</button>
-      <button type="button" class="btn btn-sm" id="playBtn" onclick="toggleAutoPlay()">▶ Play Slow Motion</button>
-      <button type="button" class="btn btn-sm" onclick="stepNext()">Next ▶</button>
-      <button type="button" class="btn btn-outline btn-sm" onclick="stepAll()">⏭ Complete</button>
+    <div class="step-controls" style="margin-top: 10px; width: 100%;">
+      <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center; width: 100%;">
+        <button type="button" class="btn btn-outline btn-sm" onclick="stepReset()">⏮ Reset</button>
+        <button type="button" class="btn btn-outline btn-sm" onclick="stepPrev()">◀ Prev</button>
+        <button type="button" class="btn btn-sm" id="playBtn" onclick="toggleAutoPlay()" style="min-width: 140px;">▶ Play Slow Motion</button>
+        <button type="button" class="btn btn-sm" onclick="stepNext()">Next ▶</button>
+        <button type="button" class="btn btn-outline btn-sm" onclick="stepAll()">⏭ Complete</button>
+      </div>
+      
+      <!-- GIANT BENCH TOUCH BUTTON -->
+      <button type="button" class="btn-giant" onclick="stepNext()" style="width: 100%;">
+        👉 NEXT THREAD (TAP ANYWHERE)
+      </button>
     </div>
   </div>
 
@@ -542,7 +607,60 @@
   </div>
 </div>
 
-<!-- TAB 5: GLOSSARY -->
+<!-- TAB 5: GUIDE LAYOUT & SPIRAL WRAP CALCULATOR -->
+<div id="panel-guide" class="tab-panel">
+  <div class="grid-layout">
+    <div class="card">
+      <h2>🎣 Custom Guide Layout Settings</h2>
+      <div class="row-2">
+        <div class="form-group">
+          <label>Rod Length</label>
+          <input type="number" id="rodTotalLength" value="7.0" step="0.5" oninput="calculateGuideSpacing()" />
+        </div>
+        <div class="form-group">
+          <label>Length Unit</label>
+          <select id="guideLengthUnit" onchange="calculateGuideSpacing()">
+            <option value="ft" selected>Feet (ft)</option>
+            <option value="in">Inches (in)</option>
+            <option value="mm">mm</option>
+          </select>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="form-group">
+          <label>Guide Count (Excluding Tip)</label>
+          <input type="number" id="totalGuides" value="9" min="5" max="15" oninput="calculateGuideSpacing()" />
+        </div>
+        <div class="form-group">
+          <label>Wrap Style</label>
+          <select id="guideWrapStyle" onchange="calculateGuideSpacing()">
+            <option value="SPIRAL_SIMPLE" selected>Spiral Acid Wrap (Simple 0°-180° Bumper)</option>
+            <option value="SPIRAL_PROGRESSIVE">Spiral Acid Wrap (0°-60°-120°-180°)</option>
+            <option value="CASTING_STD">Traditional Casting (Top 0°)</option>
+            <option value="SPINNING_STD">Traditional Spinning (Bottom 180°)</option>
+          </select>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="form-group">
+          <label>Distance to First Guide (Butt/Stripper)</label>
+          <input type="number" id="distToStripper" value="21.0" step="0.5" oninput="calculateGuideSpacing()" />
+        </div>
+        <div class="form-group">
+          <label>Tip-to-Choker Spacing</label>
+          <input type="number" id="tipToFirstGuide" value="4.0" step="0.25" oninput="calculateGuideSpacing()" />
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Guide Spacing & Axial Rotation Table</h2>
+      <div id="guideResults"></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 6: GLOSSARY -->
 <div id="panel-gloss" class="tab-panel">
   <div class="card">
     <h2>📖 Rod Wrap Terminology & Pattern Glossary</h2>
@@ -567,17 +685,17 @@
   </div>
 </div>
 
-<!-- TAB 6: VISUALWRAP IMPORTER -->
+<!-- TAB 7: VISUALWRAP IMPORTER -->
 <div id="panel-imp" class="tab-panel">
   <div class="grid-layout">
     <div>
       <div class="card">
         <h2>Import VisualWRAP Script</h2>
         
-        <div style="background: #111520; border: 1px dashed var(--accent-gold); border-radius: 6px; padding: 12px; margin-bottom: 14px;">
+        <div style="background: #080a0f; border: 1px dashed var(--accent-gold); border-radius: 6px; padding: 12px; margin-bottom: 14px;">
           <label style="color: var(--accent-gold);">📁 Load .vwp File from Downloads</label>
           <input type="file" id="vwpFileInput" accept=".vwp,.txt" onchange="handleVwpFileUpload(event)" style="padding: 6px; font-size: 0.82rem; cursor: pointer;" />
-          <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">Automatically detects Axis count, ThreadCentral INI tags, and VisualWRAP coordinates.</p>
+          <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">Supports all ThreadCentral, VisualWRAP v1/v2, INI, and custom scripts.</p>
         </div>
 
         <div class="form-group">
@@ -604,7 +722,7 @@
   </div>
 </div>
 
-<!-- TAB 7: THREAD INVENTORY -->
+<!-- TAB 8: THREAD INVENTORY & LIVE SPOOL METERS -->
 <div id="panel-lib" class="tab-panel">
   <div class="card">
     <h2>➕ Add Custom Spool</h2>
@@ -633,7 +751,7 @@
 
   <div class="card">
     <h2>
-      <span>Full Brand Catalog & Bench Inventory</span>
+      <span>Full Brand Catalog & Live Spool Remaining Meters</span>
       <span style="font-size:0.75rem; color:var(--text-muted);" id="inventoryCount">0 Spools Owned</span>
     </h2>
 
@@ -655,9 +773,9 @@
           <option value="ProWrap Metallic">ProWrap Metallic</option>
           <option value="ProWrap Color Fast">ProWrap Color Fast</option>
           <option value="ProWrap Nylon">ProWrap Nylon</option>
-          <option value="Fish Hawk Nylon">Fish Hawk (RodDancer) Nylon</option>
-          <option value="Fish Hawk Opaque">Fish Hawk (RodDancer) Opaque</option>
-          <option value="Gudebrod Heritage">Gudebrod Heritage Classics</option>
+          <option value="Fish Hawk Nylon">Fish Hawk Nylon</option>
+          <option value="Fish Hawk Opaque">Fish Hawk Opaque</option>
+          <option value="Gudebrod Heritage">Gudebrod Heritage</option>
           <option value="Madeira Polyneon">Madeira Polyneon</option>
           <option value="Custom / Shop Spools">Custom / Shop Spools</option>
         </select>
@@ -679,7 +797,7 @@
   </div>
 </div>
 
-<!-- TAB 8: TAPER (AUTO-SYNCED TO DESIGNER) -->
+<!-- TAB 9: TAPER & 1:1 PRINTABLE SCALE RULER TAPE -->
 <div id="panel-lay" class="tab-panel">
   <div class="grid-layout">
     <div class="card">
@@ -722,17 +840,20 @@
         <label>Pattern Cross Count (Repeats)</label>
         <input type="number" id="targetCrosses" value="4" min="1" max="15" oninput="calculateLayout()" />
       </div>
-      <div id="taperSummaryBadge" style="background:#0c0f16; border:1px solid var(--border-color); border-radius:6px; padding:10px; font-size:0.8rem; color:var(--accent-gold);"></div>
+      <div id="taperSummaryBadge" style="background:#080a0f; border:1px solid var(--border-color); border-radius:6px; padding:10px; font-size:0.8rem; color:var(--accent-gold);"></div>
     </div>
 
     <div class="card">
-      <h2>Taper Offset Spacing Marks</h2>
+      <h2>
+        <span>Taper Offset Spacing Marks</span>
+        <button type="button" class="btn btn-outline btn-sm" onclick="printScaleTape()">🖨️ Print 1:1 Scale Alignment Tape</button>
+      </h2>
       <div id="layoutResults"></div>
     </div>
   </div>
 </div>
 
-<!-- TAB 9: VISUALWRAP EXPORT -->
+<!-- TAB 10: VISUALWRAP EXPORT -->
 <div id="panel-vws" class="tab-panel">
   <div class="card">
     <h2>VisualWRAP Formatted Script Export</h2>
@@ -741,175 +862,79 @@
   </div>
 </div>
 
-<script>
-// TRUE MASTER CATALOG (120+ SPOOLS)
-const DEFAULT_CATALOG = [
-  // 1. FUJI METALLIC
-  { id: "fj_m901", brand: "Fuji Ultra Poly Metallic", code: "901 / 022 / M-02", name: "Gold Metallic", hex: "#CCA43B" },
-  { id: "fj_m902", brand: "Fuji Ultra Poly Metallic", code: "902 / 020 / M-01", name: "Silver Metallic", hex: "#D3D3D3" },
-  { id: "fj_m903", brand: "Fuji Ultra Poly Metallic", code: "903 / 023 / M-03", name: "Copper Metallic", hex: "#B87333" },
-  { id: "fj_m904", brand: "Fuji Ultra Poly Metallic", code: "904 / 039 / M-19", name: "Gunmetal Metallic", hex: "#383838" },
-  { id: "fj_m905", brand: "Fuji Ultra Poly Metallic", code: "905 / 026 / M-06", name: "Red Metallic", hex: "#9E2A2B" },
-  { id: "fj_m906", brand: "Fuji Ultra Poly Metallic", code: "906 / 025 / M-05", name: "Royal Blue Metallic", hex: "#00308F" },
-  { id: "fj_m907", brand: "Fuji Ultra Poly Metallic", code: "907 / 028 / M-08", name: "Green Metallic", hex: "#1E5631" },
-  { id: "fj_m908", brand: "Fuji Ultra Poly Metallic", code: "908", name: "Blue Metallic", hex: "#00509D" },
-  { id: "fj_m909", brand: "Fuji Ultra Poly Metallic", code: "909 / 034 / M-14", name: "Purple Metallic", hex: "#8338EC" },
-  { id: "fj_m024", brand: "Fuji Ultra Poly Metallic", code: "024 / M-04", name: "Light Blue Metallic", hex: "#3A86FF" },
-  { id: "fj_m027", brand: "Fuji Ultra Poly Metallic", code: "027 / M-07", name: "Dark Red Metallic", hex: "#660708" },
-  { id: "fj_m029", brand: "Fuji Ultra Poly Metallic", code: "029 / M-09", name: "Lime Green Metallic", hex: "#52B788" },
-  { id: "fj_m030", brand: "Fuji Ultra Poly Metallic", code: "030 / M-10", name: "Aqua Metallic", hex: "#00B4D8" },
-  { id: "fj_m031", brand: "Fuji Ultra Poly Metallic", code: "031 / M-11", name: "Orange Metallic", hex: "#E85D04" },
-  { id: "fj_m032", brand: "Fuji Ultra Poly Metallic", code: "032 / M-12", name: "Pink Metallic", hex: "#FF4D6D" },
-  { id: "fj_m035", brand: "Fuji Ultra Poly Metallic", code: "035", name: "Teal Metallic", hex: "#00A896" },
-  { id: "fj_m040", brand: "Fuji Ultra Poly Metallic", code: "040 / 910 / M-20", name: "Pale Gold Metallic", hex: "#E5C358" },
+<!-- HIDDEN PRINTABLE 1:1 TAPE CANVAS CONTAINER -->
+<div id="printableTapeArea" style="display:none;"></div>
 
-  // 2. FUJI NEON
+<script>
+// MASTER THREAD CATALOG (120+ SPOOLS)
+const DEFAULT_CATALOG = [
+  // FUJI METALLIC
+  { id: "fj_m901", brand: "Fuji Ultra Poly Metallic", code: "901", name: "Gold Metallic", hex: "#CCA43B" },
+  { id: "fj_m902", brand: "Fuji Ultra Poly Metallic", code: "902", name: "Silver Metallic", hex: "#D3D3D3" },
+  { id: "fj_m903", brand: "Fuji Ultra Poly Metallic", code: "903", name: "Copper Metallic", hex: "#B87333" },
+  { id: "fj_m904", brand: "Fuji Ultra Poly Metallic", code: "904", name: "Gunmetal Metallic", hex: "#383838" },
+  { id: "fj_m905", brand: "Fuji Ultra Poly Metallic", code: "905", name: "Red Metallic", hex: "#9E2A2B" },
+  { id: "fj_m906", brand: "Fuji Ultra Poly Metallic", code: "906", name: "Royal Blue Metallic", hex: "#00308F" },
+  { id: "fj_m907", brand: "Fuji Ultra Poly Metallic", code: "907", name: "Green Metallic", hex: "#1E5631" },
+  { id: "fj_m908", brand: "Fuji Ultra Poly Metallic", code: "908", name: "Blue Metallic", hex: "#00509D" },
+  { id: "fj_m909", brand: "Fuji Ultra Poly Metallic", code: "909", name: "Purple Metallic", hex: "#8338EC" },
+  { id: "fj_m024", brand: "Fuji Ultra Poly Metallic", code: "024", name: "Light Blue Metallic", hex: "#3A86FF" },
+  { id: "fj_m027", brand: "Fuji Ultra Poly Metallic", code: "027", name: "Dark Red Metallic", hex: "#660708" },
+  { id: "fj_m029", brand: "Fuji Ultra Poly Metallic", code: "029", name: "Lime Green Metallic", hex: "#52B788" },
+  { id: "fj_m030", brand: "Fuji Ultra Poly Metallic", code: "030", name: "Aqua Metallic", hex: "#00B4D8" },
+  { id: "fj_m031", brand: "Fuji Ultra Poly Metallic", code: "031", name: "Orange Metallic", hex: "#E85D04" },
+  { id: "fj_m032", brand: "Fuji Ultra Poly Metallic", code: "032", name: "Pink Metallic", hex: "#FF4D6D" },
+  { id: "fj_m035", brand: "Fuji Ultra Poly Metallic", code: "035", name: "Teal Metallic", hex: "#00A896" },
+  { id: "fj_m040", brand: "Fuji Ultra Poly Metallic", code: "040", name: "Pale Gold Metallic", hex: "#E5C358" },
+  // FUJI NEON
   { id: "fj_503", brand: "Fuji Neon Series", code: "503", name: "Neon Green", hex: "#39FF14" },
   { id: "fj_504", brand: "Fuji Neon Series", code: "504", name: "Neon Lime", hex: "#CCFF00" },
   { id: "fj_501", brand: "Fuji Neon Series", code: "501", name: "Neon Orange", hex: "#FF5E00" },
   { id: "fj_502", brand: "Fuji Neon Series", code: "502", name: "Neon Pink", hex: "#FF1493" },
-
-  // 3. FUJI ULTRA POLY SOLIDS
-  { id: "fj_001", brand: "Fuji Ultra Poly", code: "001 / 01", name: "White", hex: "#FFFFFF" },
-  { id: "fj_002", brand: "Fuji Ultra Poly", code: "002 / 02", name: "Black", hex: "#0A0A0A" },
-  { id: "fj_003", brand: "Fuji Ultra Poly", code: "003 / 03", name: "Smoke Grey", hex: "#7D8597" },
-  { id: "fj_004", brand: "Fuji Ultra Poly", code: "004 / 04", name: "Cobalt Blue", hex: "#004B87" },
-  { id: "fj_005", brand: "Fuji Ultra Poly", code: "005 / 05", name: "Royal Blue", hex: "#0056B3" },
-  { id: "fj_006", brand: "Fuji Ultra Poly", code: "006 / 06", name: "Red", hex: "#BA181B" },
-  { id: "fj_007", brand: "Fuji Ultra Poly", code: "007 / 07", name: "Garnet / Dark Red", hex: "#7B1113" },
-  { id: "fj_008", brand: "Fuji Ultra Poly", code: "008 / 08", name: "Green", hex: "#2D6A4F" },
-  { id: "fj_009", brand: "Fuji Ultra Poly", code: "009 / 09", name: "Teal / Aqua", hex: "#007F5F" },
-  { id: "fj_010", brand: "Fuji Ultra Poly", code: "010 / 10", name: "Olive Green", hex: "#556B2F" },
-  { id: "fj_011", brand: "Fuji Ultra Poly", code: "011 / 11", name: "Chestnut Brown", hex: "#5C4033" },
-  { id: "fj_012", brand: "Fuji Ultra Poly", code: "012 / 12", name: "Goldenrod / Tan", hex: "#D4A373" },
-  { id: "fj_013", brand: "Fuji Ultra Poly", code: "013 / 13", name: "Orange", hex: "#F77F00" },
-  { id: "fj_014", brand: "Fuji Ultra Poly", code: "014 / 914 / 14", name: "Purple", hex: "#6A0DAD" },
-  { id: "fj_015", brand: "Fuji Ultra Poly", code: "015 / 15", name: "Dark Purple / Eggplant", hex: "#3C096C" },
-  { id: "fj_016", brand: "Fuji Ultra Poly", code: "016 / 16", name: "Lemon Yellow", hex: "#FFD000" },
-  { id: "fj_017", brand: "Fuji Ultra Poly", code: "017 / 17", name: "Sunburst Medium Gold", hex: "#E0A922" },
-  { id: "fj_018", brand: "Fuji Ultra Poly", code: "018 / 18", name: "Bright Gold", hex: "#FFD700" },
-  { id: "fj_019", brand: "Fuji Ultra Poly", code: "019", name: "Light Grey", hex: "#B0B5BA" },
-  { id: "fj_020", brand: "Fuji Ultra Poly", code: "020", name: "Candy Apple Red", hex: "#C70039" },
-  { id: "fj_021", brand: "Fuji Ultra Poly", code: "021", name: "Light Blue", hex: "#5DADE2" },
-  { id: "fj_022", brand: "Fuji Ultra Poly", code: "022", name: "Hot Pink", hex: "#FF1493" },
-
-  // 4. FUJI NOCP SERIES
+  // FUJI SOLIDS
+  { id: "fj_001", brand: "Fuji Ultra Poly", code: "001", name: "White", hex: "#FFFFFF" },
+  { id: "fj_002", brand: "Fuji Ultra Poly", code: "002", name: "Black", hex: "#0A0A0A" },
+  { id: "fj_003", brand: "Fuji Ultra Poly", code: "003", name: "Smoke Grey", hex: "#7D8597" },
+  { id: "fj_004", brand: "Fuji Ultra Poly", code: "004", name: "Cobalt Blue", hex: "#004B87" },
+  { id: "fj_005", brand: "Fuji Ultra Poly", code: "005", name: "Royal Blue", hex: "#0056B3" },
+  { id: "fj_006", brand: "Fuji Ultra Poly", code: "006", name: "Red", hex: "#BA181B" },
+  { id: "fj_007", brand: "Fuji Ultra Poly", code: "007", name: "Garnet", hex: "#7B1113" },
+  { id: "fj_008", brand: "Fuji Ultra Poly", code: "008", name: "Green", hex: "#2D6A4F" },
+  { id: "fj_009", brand: "Fuji Ultra Poly", code: "009", name: "Teal", hex: "#007F5F" },
+  { id: "fj_014", brand: "Fuji Ultra Poly", code: "014", name: "Purple", hex: "#6A0DAD" },
+  { id: "fj_018", brand: "Fuji Ultra Poly", code: "018", name: "Bright Gold", hex: "#FFD700" },
+  // FUJI NOCP
   { id: "fj_nop001", brand: "Fuji Ultra Poly NOCP", code: "NOP-001", name: "NOCP White", hex: "#FFFFFF" },
   { id: "fj_nop002", brand: "Fuji Ultra Poly NOCP", code: "NOP-002", name: "NOCP Black", hex: "#0D0D0D" },
   { id: "fj_nop004", brand: "Fuji Ultra Poly NOCP", code: "NOP-004", name: "NOCP Cobalt Blue", hex: "#0052A5" },
   { id: "fj_nop006", brand: "Fuji Ultra Poly NOCP", code: "NOP-006", name: "NOCP Red", hex: "#D90429" },
-  { id: "fj_nop008", brand: "Fuji Ultra Poly NOCP", code: "NOP-008", name: "NOCP Green", hex: "#2D6A4F" },
-  { id: "fj_nop009", brand: "Fuji Ultra Poly NOCP", code: "NOP-009", name: "NOCP Teal", hex: "#00A896" },
-  { id: "fj_nop014", brand: "Fuji Ultra Poly NOCP", code: "NOP-014 / 914", name: "NOCP Purple", hex: "#7B2CBF" },
-  { id: "fj_nop018", brand: "Fuji Ultra Poly NOCP", code: "NOP-018", name: "NOCP Bright Gold", hex: "#FFC300" },
+  { id: "fj_nop014", brand: "Fuji Ultra Poly NOCP", code: "NOP-014", name: "NOCP Purple", hex: "#7B2CBF" },
   { id: "fj_nop024", brand: "Fuji Ultra Poly NOCP", code: "NOP-024", name: "Maui Wowie", hex: "#2EC4B6" },
-  { id: "fj_nop025", brand: "Fuji Ultra Poly NOCP", code: "NOP-025", name: "Bracket Blue", hex: "#1D3557" },
-  { id: "fj_nop026", brand: "Fuji Ultra Poly NOCP", code: "NOP-026", name: "Moss Brown", hex: "#6F4E37" },
-  { id: "fj_nop027", brand: "Fuji Ultra Poly NOCP", code: "NOP-027", name: "Moss Green", hex: "#405D27" },
-  { id: "fj_nop028", brand: "Fuji Ultra Poly NOCP", code: "NOP-028", name: "Olive Green", hex: "#556B2F" },
-  { id: "fj_nop029", brand: "Fuji Ultra Poly NOCP", code: "NOP-029", name: "Desert Tan", hex: "#D2B48C" },
-  { id: "fj_nop030", brand: "Fuji Ultra Poly NOCP", code: "NOP-030", name: "Secret Squirrel", hex: "#4A4036" },
-  { id: "fj_nop031", brand: "Fuji Ultra Poly NOCP", code: "NOP-031", name: "Midnight", hex: "#191970" },
-  { id: "fj_nop032", brand: "Fuji Ultra Poly NOCP", code: "NOP-032", name: "Tactical Tan", hex: "#C2B280" },
-  { id: "fj_nop033", brand: "Fuji Ultra Poly NOCP", code: "NOP-033", name: "Flat Dark Earth", hex: "#7D6B56" },
-  { id: "fj_nop034", brand: "Fuji Ultra Poly NOCP", code: "NOP-034", name: "OG Green", hex: "#355E3B" },
-  { id: "fj_nop035", brand: "Fuji Ultra Poly NOCP", code: "NOP-035", name: "Aquamarine", hex: "#7FFFD4" },
-  { id: "fj_nop036", brand: "Fuji Ultra Poly NOCP", code: "NOP-036", name: "Concrete", hex: "#8A8D8F" },
-  { id: "fj_nop037", brand: "Fuji Ultra Poly NOCP", code: "NOP-037", name: "Rain Cloud", hex: "#5C6B73" },
-  { id: "fj_nop038", brand: "Fuji Ultra Poly NOCP", code: "NOP-038", name: "Purple Haze", hex: "#5E4B8B" },
-  { id: "fj_nop039", brand: "Fuji Ultra Poly NOCP", code: "NOP-039", name: "Cobalt Blue", hex: "#0047AB" },
-  { id: "fj_nop040", brand: "Fuji Ultra Poly NOCP", code: "NOP-040", name: "Bubblegum Pink", hex: "#FF69B4" },
   { id: "fj_nop041", brand: "Fuji Ultra Poly NOCP", code: "NOP-041", name: "Blurple", hex: "#4B0082" },
-  { id: "fj_nop042", brand: "Fuji Ultra Poly NOCP", code: "NOP-042", name: "Taxi Cab Yellow", hex: "#FDB813" },
   { id: "fj_nop043", brand: "Fuji Ultra Poly NOCP", code: "NOP-043", name: "Cheddar", hex: "#FFA600" },
-  { id: "fj_nop044", brand: "Fuji Ultra Poly NOCP", code: "NOP-044", name: "Spring Green", hex: "#00FF7F" },
-  { id: "fj_nop045", brand: "Fuji Ultra Poly NOCP", code: "NOP-045", name: "Cork", hex: "#BA8C63" },
-
-  // 5. PROWRAP METALLIC
+  // PROWRAP METALLIC
   { id: "pw_9100", brand: "ProWrap Metallic", code: "9100", name: "Yellow Gold", hex: "#E8C838" },
-  { id: "pw_9110", brand: "ProWrap Metallic", code: "9110", name: "Gold Leaf", hex: "#D4AF37" },
-  { id: "pw_9120", brand: "ProWrap Metallic", code: "9120", name: "Goldenrod", hex: "#DAA520" },
-  { id: "pw_9130", brand: "ProWrap Metallic", code: "9130", name: "Standard Gold", hex: "#CCA43B" },
-  { id: "pw_9140", brand: "ProWrap Metallic", code: "9140", name: "Goldust", hex: "#E5C158" },
-  { id: "pw_9150", brand: "ProWrap Metallic", code: "9150", name: "Bright Copper", hex: "#C86D3B" },
-  { id: "pw_9160", brand: "ProWrap Metallic", code: "9160", name: "Pale Gold", hex: "#F0E2A8" },
-  { id: "pw_9170", brand: "ProWrap Metallic", code: "9170", name: "Calcutta Gold", hex: "#C59B27" },
-  { id: "pw_9460", brand: "ProWrap Metallic", code: "9460", name: "Deep Blue", hex: "#0A2472" },
-  { id: "pw_9510", brand: "ProWrap Metallic", code: "9510", name: "Lime", hex: "#70E000" },
-  { id: "pw_9520", brand: "ProWrap Metallic", code: "9520", name: "Green", hex: "#2E7D32" },
-  { id: "pw_9530", brand: "ProWrap Metallic", code: "9530", name: "Forest Green", hex: "#1B4D3E" },
-  { id: "pw_9540", brand: "ProWrap Metallic", code: "9540", name: "Shamrock", hex: "#009E60" },
   { id: "pw_9600", brand: "ProWrap Metallic", code: "9600", name: "Purple Metallic", hex: "#782299" },
-  { id: "pw_9610", brand: "ProWrap Metallic", code: "9610", name: "Pale Gold Metallic", hex: "#E5C358" },
   { id: "pw_9620", brand: "ProWrap Metallic", code: "9620", name: "Gold Metallic", hex: "#D4AF37" },
   { id: "pw_9630", brand: "ProWrap Metallic", code: "9630", name: "Silver Metallic", hex: "#C0C0C0" },
-  { id: "pw_9640", brand: "ProWrap Metallic", code: "9640", name: "Copper Metallic", hex: "#B87333" },
   { id: "pw_9650", brand: "ProWrap Metallic", code: "9650", name: "Red Metallic", hex: "#C1121F" },
   { id: "pw_9660", brand: "ProWrap Metallic", code: "9660", name: "Blue Metallic", hex: "#00509D" },
-  { id: "pw_9670", brand: "ProWrap Metallic", code: "9670", name: "Green Metallic", hex: "#2D6A4F" },
   { id: "pw_9680", brand: "ProWrap Metallic", code: "9680", name: "Aqua / Teal Metallic", hex: "#00A896" },
-  { id: "pw_9690", brand: "ProWrap Metallic", code: "9690", name: "Ice Blue Metallic", hex: "#48CAE4" },
-  { id: "pw_9700", brand: "ProWrap Metallic", code: "9700", name: "Lime Metallic", hex: "#70E000" },
-  { id: "pw_9730", brand: "ProWrap Metallic", code: "9730", name: "Brass", hex: "#B5A642" },
-  { id: "pw_9740", brand: "ProWrap Metallic", code: "9740", name: "Brown", hex: "#5C4033" },
-  { id: "pw_9750", brand: "ProWrap Metallic", code: "9750", name: "Bronze", hex: "#8C7853" },
   { id: "pw_9800", brand: "ProWrap Metallic", code: "9800", name: "Gunmetal Metallic", hex: "#2B2B2B" },
-  { id: "pw_9840", brand: "ProWrap Metallic", code: "9840", name: "Silverback", hex: "#7A7A7A" },
-
-  // 6. PROWRAP COLOR FAST & NYLON
-  { id: "pw_319", brand: "ProWrap Color Fast", code: "319", name: "Redfish", hex: "#C8102E" },
-  { id: "pw_322", brand: "ProWrap Color Fast", code: "322", name: "Scarlet Red", hex: "#D90429" },
+  // PROWRAP COLOR FAST & NYLON
   { id: "pw_440", brand: "ProWrap Color Fast", code: "440", name: "Turquoise", hex: "#00D2FF" },
-  { id: "pw_446", brand: "ProWrap Color Fast", code: "446", name: "Royal Blue", hex: "#0038A8" },
-  { id: "pw_525", brand: "ProWrap Color Fast", code: "525", name: "Cobalt Blue", hex: "#003566" },
-  { id: "pw_611", brand: "ProWrap Color Fast", code: "611", name: "Deep Purple", hex: "#4A0E4E" },
-  { id: "pw_807", brand: "ProWrap Color Fast", code: "807", name: "Pure White", hex: "#F8F9FA" },
   { id: "pw_862", brand: "ProWrap Color Fast", code: "862", name: "Midnight Black", hex: "#111111" },
-  { id: "pw_207", brand: "ProWrap Color Fast", code: "207", name: "Sunburst Gold", hex: "#F4A261" },
-  { id: "pw_n01", brand: "ProWrap Nylon", code: "NY-01", name: "Nylon Jet Black", hex: "#050505" },
-  { id: "pw_n02", brand: "ProWrap Nylon", code: "NY-02", name: "Nylon Bright White", hex: "#FAFAFA" },
-  { id: "pw_n07", brand: "ProWrap Nylon", code: "NY-07", name: "Nylon Royal Blue", hex: "#0D47A1" },
-
-  // 7. FISH HAWK NYLON & OPAQUE
-  { id: "fh_206", brand: "Fish Hawk Nylon", code: "FH-206", name: "Garnet", hex: "#7B1113" },
-  { id: "fh_209", brand: "Fish Hawk Nylon", code: "FH-209", name: "Goldenrod", hex: "#DAA520" },
-  { id: "fh_221", brand: "Fish Hawk Nylon", code: "FH-221", name: "Orange", hex: "#FF5E00" },
-  { id: "fh_245", brand: "Fish Hawk Nylon", code: "FH-245", name: "Royal Blue", hex: "#0056B3" },
-  { id: "fh_246", brand: "Fish Hawk Nylon", code: "FH-246", name: "Dark Blue", hex: "#002366" },
-  { id: "fh_257", brand: "Fish Hawk Nylon", code: "FH-257", name: "Rust", hex: "#8B3103" },
-  { id: "fh_272", brand: "Fish Hawk Nylon", code: "FH-272", name: "Blue Dun", hex: "#6E7F80" },
-  { id: "fh_274", brand: "Fish Hawk Nylon", code: "FH-274", name: "Chestnut", hex: "#5C4033" },
-  { id: "fh_326", brand: "Fish Hawk Nylon", code: "FH-326", name: "Scarlet", hex: "#D90429" },
-  { id: "fh_337", brand: "Fish Hawk Nylon", code: "FH-337", name: "Maroon", hex: "#800000" },
-  { id: "fh_396", brand: "Fish Hawk Nylon", code: "FH-396", name: "Dark Brown", hex: "#3B271A" },
-  { id: "fh_468", brand: "Fish Hawk Nylon", code: "FH-468", name: "Purple", hex: "#6A0DAD" },
-  { id: "fh_778", brand: "Fish Hawk Nylon", code: "FH-778", name: "Lemon Yellow", hex: "#FFF44F" },
-  { id: "fh_779", brand: "Fish Hawk Nylon", code: "FH-779", name: "Medium Green", hex: "#2E8B57" },
-  { id: "fh_896", brand: "Fish Hawk Nylon", code: "FH-896", name: "Dark Green", hex: "#1C3F24" },
-  { id: "fh_op129", brand: "Fish Hawk Opaque", code: "OP-129", name: "Dark Aqua", hex: "#008B8B" },
-  { id: "fh_op638", brand: "Fish Hawk Opaque", code: "OP-638", name: "Teal", hex: "#008080" },
-
-  // 8. GUDEBROD HERITAGE
+  { id: "pw_807", brand: "ProWrap Color Fast", code: "807", name: "Pure White", hex: "#F8F9FA" },
+  { id: "pw_525", brand: "ProWrap Color Fast", code: "525", name: "Cobalt Blue", hex: "#003566" },
+  { id: "pw_322", brand: "ProWrap Color Fast", code: "322", name: "Scarlet Red", hex: "#D90429" },
+  { id: "pw_n01", brand: "ProWrap Nylon", code: "NY-01", name: "Jet Black", hex: "#050505" },
+  // GUDEBROD HERITAGE
   { id: "gb_001", brand: "Gudebrod Heritage", code: "#001", name: "Black", hex: "#000000" },
   { id: "gb_002", brand: "Gudebrod Heritage", code: "#002", name: "White", hex: "#FFFFFF" },
   { id: "gb_206", brand: "Gudebrod Heritage", code: "#206", name: "Garnet", hex: "#73000A" },
   { id: "gb_209", brand: "Gudebrod Heritage", code: "#209", name: "Goldenrod", hex: "#D4AF37" },
-  { id: "gb_221", brand: "Gudebrod Heritage", code: "#221", name: "Orange", hex: "#FF4500" },
   { id: "gb_245", brand: "Gudebrod Heritage", code: "#245", name: "Royal Blue", hex: "#002FA7" },
-  { id: "gb_272", brand: "Gudebrod Heritage", code: "#272", name: "Blue Dun", hex: "#5C6B73" },
-  { id: "gb_326", brand: "Gudebrod Heritage", code: "#326", name: "Scarlet", hex: "#E60000" },
-  { id: "gb_337", brand: "Gudebrod Heritage", code: "#337", name: "Maroon", hex: "#5E1914" },
-  { id: "gb_396", brand: "Gudebrod Heritage", code: "#396", name: "Dark Brown", hex: "#3D2314" },
-  { id: "gb_468", brand: "Gudebrod Heritage", code: "#468", name: "Purple", hex: "#551A8B" },
-  { id: "gb_779", brand: "Gudebrod Heritage", code: "#779", name: "Medium Green", hex: "#228B22" },
-
-  // 9. MADEIRA POLYNEON
-  { id: "mad_1801", brand: "Madeira Polyneon", code: "1801", name: "Super White", hex: "#FFFFFF" },
-  { id: "mad_1800", brand: "Madeira Polyneon", code: "1800", name: "Emerald Black", hex: "#0A0A0A" },
-  { id: "mad_1842", brand: "Madeira Polyneon", code: "1842", name: "Electric Blue", hex: "#007FFF" },
-  { id: "mad_1734", brand: "Madeira Polyneon", code: "1734", name: "Auburn Red", hex: "#9E1B32" },
-  { id: "mad_1683", brand: "Madeira Polyneon", code: "1683", name: "Sun Yellow", hex: "#FFD300" },
-  { id: "mad_1970", brand: "Madeira Polyneon", code: "1970", name: "Imperial Purple", hex: "#66023C" }
+  { id: "gb_326", brand: "Gudebrod Heritage", code: "#326", name: "Scarlet", hex: "#E60000" }
 ];
 
 const DEFAULT_PATTERNS = [
@@ -1009,12 +1034,17 @@ const DEFAULT_PATTERNS = [
   }
 ];
 
-const STORAGE_PREFIX = "tsp_master_v12_";
+const STORAGE_PREFIX = "tsp_master_v13_";
 let customShopSpools = [];
 let masterThreadCatalog = [...DEFAULT_CATALOG];
 let ownedThreads = [
   "fj_m901", "fj_014", "pw_440", "fj_002", "fj_503", "fj_504", "fj_m902", "fj_m908", "fj_m024", "fj_m035", "pw_9600", "pw_9620", "gb_206", "gb_326"
 ];
+
+// SPOOL YARDAGE CAPACITY INVENTORY DICTIONARY (Default 100 Yds)
+let spoolCapacities = {};
+ownedThreads.forEach(id => { spoolCapacities[id] = 100; });
+
 let savedPatternLibrary = JSON.parse(JSON.stringify(DEFAULT_PATTERNS));
 let currentPatternTitle = savedPatternLibrary[0].name;
 let layers = JSON.parse(JSON.stringify(savedPatternLibrary[0].layers));
@@ -1027,6 +1057,8 @@ try {
   }
   const owned = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "owned"));
   if (Array.isArray(owned) && owned.length > 0) ownedThreads = owned;
+  const caps = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "caps"));
+  if (caps) spoolCapacities = caps;
   const pats = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "pats"));
   if (Array.isArray(pats) && pats.length > 0) {
     DEFAULT_PATTERNS.forEach(def => {
@@ -1071,6 +1103,7 @@ function syncAllEngines() {
   updateVisualWrapScript();
   generateWrapSheet();
   calculateLayout();
+  renderThreadLibrary();
 }
 
 function updateScalingIndicators() {
@@ -1085,6 +1118,29 @@ function updateScalingIndicators() {
   const s2 = document.getElementById('axisTickSummary');
   if (s1) s1.innerHTML = `Pattern Scale: <strong>${totLen.toFixed(2)} ${unit}</strong> total (${reps} repeats @ <strong>${repeatInterval.toFixed(3)} ${unit}</strong> / repeat)`;
   if (s2) s2.innerHTML = `${axis}-Axis Crossing Marks @ every <strong>${axisStep.toFixed(3)} ${unit}</strong> along blank`;
+}
+
+// 1-CLICK PALETTE SWAPPER
+function applyThemePalette(theme) {
+  const palettes = {
+    inshore: ["fj_m035", "fj_m901", "pw_440", "fj_002"],
+    nordic: ["pw_9600", "fj_m902", "fj_nop041", "gb_001"],
+    stealth: ["pw_9800", "fj_m906", "fj_003", "fj_002"],
+    neon: ["fj_503", "fj_501", "fj_504", "fj_002"]
+  };
+
+  let selected = palettes[theme];
+  if (theme === 'random' || !selected) {
+    const owned = masterThreadCatalog.filter(t => ownedThreads.includes(t.id));
+    selected = [...owned].sort(() => 0.5 - Math.random()).map(t => t.id);
+  }
+
+  layers.forEach((layer, idx) => {
+    layer.threadId = selected[idx % selected.length] || masterThreadCatalog[0].id;
+  });
+
+  renderLayersUI();
+  syncAllEngines();
 }
 
 function updateBlankColor(val) {
@@ -1147,7 +1203,7 @@ function renderLayersUI() {
     masterThreadCatalog.filter(t => ownedThreads.includes(t.id)).forEach(t => {
       opt += `<option value="${t.id}" ${layer.threadId === t.id ? 'selected' : ''}>${t.brand} ${t.code} (${t.name})</option>`;
     });
-    opt += `</optgroup><optgroup label="Master Catalog Spools (Fuji, ProWrap, FishHawk, Gudebrod)">`;
+    opt += `</optgroup><optgroup label="Master Catalog Spools">`;
     masterThreadCatalog.filter(t => !ownedThreads.includes(t.id)).forEach(t => {
       opt += `<option value="${t.id}" ${layer.threadId === t.id ? 'selected' : ''}>${t.brand} ${t.code} (${t.name})</option>`;
     });
@@ -1235,7 +1291,7 @@ function buildFlattenedSteps() {
   if (currentStepIndex > flattenedThreadSteps.length) currentStepIndex = flattenedThreadSteps.length;
 }
 
-// 2D PROPORTIONAL WRAP CANVAS
+// 2D PROPORTIONAL WRAP CANVAS WITH UNDER/OVER WEAVE BRAID ENGINE
 function renderPattern() {
   const canvas = document.getElementById('wrapCanvas');
   if (!canvas) return;
@@ -1244,6 +1300,7 @@ function renderPattern() {
   const axis = parseInt(document.getElementById('patternAxis')?.value || 4);
   const totLen = parseFloat(document.getElementById('targetWrapLength')?.value || 6.0);
   const unit = document.getElementById('wrapUnit')?.value || "in";
+  const useShadows = document.getElementById('enableWeaveShadows')?.checked ?? true;
 
   const w = canvas.width;
   const h = canvas.height;
@@ -1285,8 +1342,17 @@ function renderPattern() {
   layers.forEach((layer, lIdx) => {
     const thread = getThreadInfo(layer.threadId);
     ctx.strokeStyle = thread.hex;
-    ctx.lineWidth = Math.max(1.6, layer.passes * 0.85);
+    ctx.lineWidth = Math.max(1.8, layer.passes * 0.9);
     ctx.lineCap = "round";
+
+    if (useShadows) {
+      ctx.shadowColor = "rgba(0,0,0,0.65)";
+      ctx.shadowBlur = 4;
+      ctx.shadowOffsetY = 2;
+    } else {
+      ctx.shadowColor = "transparent";
+      ctx.shadowBlur = 0;
+    }
 
     for (let r = 0; r < repeats; r++) {
       const cx = padLeft + (r * cellW) + (cellW / 2);
@@ -1321,9 +1387,10 @@ function renderPattern() {
       ctx.stroke();
     }
   });
+  ctx.shadowColor = "transparent";
 }
 
-// TWO-WAY HELICAL PASS GENERATOR
+// TWO-WAY HELICAL PASS
 function getTwoWayThreadPasses(step, r, repeats, cellW, rodX, centerY, buttDiam, tipDiam, axis) {
   const cx = rodX + (r * cellW) + (cellW / 2);
   const taperRatio = (r + 0.5) / repeats;
@@ -1358,7 +1425,7 @@ function getTwoWayThreadPasses(step, r, repeats, cellW, rodX, centerY, buttDiam,
   return { forward: forwardSegments, return: returnSegments };
 }
 
-// STEP WORKBENCH CANVAS & LIVE TELEMETRY HUD UPDATE
+// STEP WORKBENCH CANVAS
 function renderStepCanvas() {
   const canvas = document.getElementById('stepCanvas');
   if (!canvas) return;
@@ -1528,8 +1595,8 @@ function renderStepCanvas() {
 
   if (currentStepIndex === 0) {
     if (headEl) headEl.textContent = `Step 0 of ${flattenedThreadSteps.length}: Ready to Wrap`;
-    if (subEl) subEl.textContent = `Click "Play Slow Motion" or "Next Thread" to start laying down threads.`;
-    if (hudEl) hudEl.innerHTML = `<span class="badge">STANDBY</span> Waiting to wrap. Select "Next Thread" or "Play" to start.`;
+    if (subEl) subEl.textContent = `Click "Play Slow Motion" or tap giant button to start.`;
+    if (hudEl) hudEl.innerHTML = `<span class="badge">STANDBY</span> Waiting to wrap. Tap "Next Thread" to start.`;
   } else {
     const active = flattenedThreadSteps[currentStepIndex - 1];
     const thread = getThreadInfo(active.threadId);
@@ -1545,7 +1612,6 @@ function renderStepCanvas() {
     let pt4 = `270° (${(axDist * 3).toFixed(2)}${unit})`;
     let ptEnd = `Tip End (${totLen.toFixed(2)}${unit})`;
 
-    // BEGINNER-FRIENDLY PLACEMENT CUES
     let placementCue = "";
     if (active.type === "OUT") {
       placementCue = "🎯 PLACEMENT: Lay this thread to the OUTSIDE edge of previous wraps (expanding away from center cross mark). Pack tightly.";
@@ -1864,6 +1930,153 @@ function reset3DAngle() {
   draw3DRod();
 }
 
+// GUIDE LAYOUT & SPIRAL ACID WRAP CALCULATOR
+function calculateGuideSpacing() {
+  const container = document.getElementById('guideResults');
+  if (!container) return;
+
+  const rLen = parseFloat(document.getElementById('rodTotalLength')?.value || 7.0);
+  const unit = document.getElementById('guideLengthUnit')?.value || 'ft';
+  const numGuides = parseInt(document.getElementById('totalGuides')?.value || 9);
+  const style = document.getElementById('guideWrapStyle')?.value || 'SPIRAL_SIMPLE';
+  const distStripper = parseFloat(document.getElementById('distToStripper')?.value || 21.0);
+  const tipFirst = parseFloat(document.getElementById('tipToFirstGuide')?.value || 4.0);
+
+  let rodLenInches = rLen * (unit === 'ft' ? 12 : (unit === 'mm' ? 0.03937 : 1));
+  const workingLength = rodLenInches - distStripper - tipFirst;
+
+  // Progressive deflection formula (2-variable progressive spacing)
+  let intervals = [];
+  let sumFactors = 0;
+  for (let i = 1; i < numGuides; i++) sumFactors += Math.pow(1.18, i);
+  const baseStep = workingLength / sumFactors;
+
+  let currentDist = tipFirst;
+  intervals.push({ guide: 1, distFromTip: currentDist, interval: currentDist, angle: "0° (Top)" });
+
+  for (let i = 1; i < numGuides; i++) {
+    const step = baseStep * Math.pow(1.18, i);
+    currentDist += step;
+    
+    // Calculate spiral rotation angle per guide
+    let angleStr = "0° (Top)";
+    if (style === 'SPIRAL_SIMPLE') {
+      if (i === numGuides - 1) angleStr = "0° (Stripper/Butt)";
+      else if (i === numGuides - 2) angleStr = "90° (Bumper Guide)";
+      else angleStr = "180° (Running Guides / Bottom)";
+    } else if (style === 'SPIRAL_PROGRESSIVE') {
+      if (i === numGuides - 1) angleStr = "0° (Stripper)";
+      else if (i === numGuides - 2) angleStr = "60° Transition";
+      else if (i === numGuides - 3) angleStr = "120° Transition";
+      else angleStr = "180° (Running Guides / Bottom)";
+    } else if (style === 'SPINNING_STD') {
+      angleStr = "180° (Bottom)";
+    }
+
+    intervals.push({
+      guide: i + 1,
+      distFromTip: currentDist,
+      interval: step,
+      angle: angleStr
+    });
+  }
+
+  let html = `
+    <div style="background:#080a0f; padding:10px; border-radius:6px; margin-bottom:10px; border:1px solid var(--border-color);">
+      <h3 style="color:var(--accent-gold); font-size:0.95rem;">${style.replace(/_/g, ' ')}</h3>
+      <p style="font-size:0.78rem; color:var(--text-muted);">Total Rod: ${rLen} ${unit} • ${numGuides} Guides + Tip-Top</p>
+    </div>
+    <table>
+      <tr><th>Guide #</th><th>Spacing From Prev</th><th>Distance From Tip</th><th>Axial Rotation (Clockwise)</th></tr>
+  `;
+
+  intervals.forEach(g => {
+    html += `
+      <tr>
+        <td><strong>Guide ${g.guide} ${g.guide === numGuides ? '(Stripper)' : ''}</strong></td>
+        <td>${g.interval.toFixed(2)}"</td>
+        <td><strong>${g.distFromTip.toFixed(2)}"</strong></td>
+        <td style="color:var(--accent-cyan); font-weight:600;">${g.angle}</td>
+      </tr>
+    `;
+  });
+
+  html += `</table>`;
+  container.innerHTML = html;
+}
+
+// 1:1 PRINTABLE SCALE TAPER RULER TAPE GENERATOR
+function printScaleTape() {
+  const buttD = parseFloat(document.getElementById('buttDiam')?.value || 0.520);
+  const tipD = parseFloat(document.getElementById('tipDiam')?.value || 0.410);
+  const crosses = parseInt(document.getElementById('targetCrosses')?.value || 4);
+  const axis = parseInt(document.getElementById('axisCount')?.value || 4);
+  const unit = document.getElementById('calcUnit')?.value || "in";
+
+  const buttCirc = buttD * Math.PI;
+  const tipCirc = tipD * Math.PI;
+  const taperDelta = (buttCirc - tipCirc) / crosses;
+
+  let tapeHtml = `
+    <div style="font-family:monospace; padding:10px; border:1px solid #000;">
+      <h2 style="font-size:14px; margin-bottom:4px;">THREAD STUDIO PRO - 1:1 SCALE BLANK ALIGNMENT TAPE</h2>
+      <p style="font-size:10px; margin-bottom:8px;">Butt: ${buttD}" | Tip: ${tipD}" | ${crosses} Crosses | ${axis}-Axis | Scale: 100% True Size</p>
+      <div style="border-top:2px solid #000; border-bottom:2px solid #000; padding:15px 0; position:relative;">
+  `;
+
+  let cumDist = 0;
+  for (let i = 1; i <= crosses; i++) {
+    const interval = buttCirc - (taperDelta * (i - 0.5));
+    cumDist += interval;
+    const axStep = interval / axis;
+    tapeHtml += `
+      <div style="margin-bottom:8px; border-left:3px solid #000; padding-left:6px;">
+        <strong>CROSS ${i} CENTERLINE: ${cumDist.toFixed(3)}${unit}</strong> (Interval: ${interval.toFixed(3)}${unit})<br/>
+        <span style="font-size:9px;">0° [Top] | 90° (+${axStep.toFixed(3)}") | 180° (+${(axStep*2).toFixed(3)}") | 270° (+${(axStep*3).toFixed(3)}")</span>
+      </div>
+    `;
+  }
+
+  tapeHtml += `
+      </div>
+      <p style="font-size:9px; margin-top:8px;">INSTRUCTIONS: Print at 100% scale (No Fit/Shrink). Cut strip along black line, tape along 0° blank axis, wrap over layout marks, and peel tape.</p>
+    </div>
+  `;
+
+  const printArea = document.getElementById('printableTapeArea');
+  if (printArea) {
+    printArea.innerHTML = tapeHtml;
+    window.print();
+  }
+}
+
+// SPOOL CONSUMPTION & YARDAGE TRACKER
+function calculateThreadConsumption() {
+  const reps = parseInt(document.getElementById('repeats')?.value || 4);
+  const totLen = parseFloat(document.getElementById('targetWrapLength')?.value || 6.0);
+  const buttD = parseFloat(document.getElementById('buttDiam')?.value || 0.520);
+  const tipD = parseFloat(document.getElementById('tipDiam')?.value || 0.410);
+  const avgCirc = ((buttD + tipD) / 2) * Math.PI;
+  const singleHelicalInch = Math.sqrt(Math.pow(avgCirc, 2) + Math.pow(totLen / reps, 2));
+
+  const consumptionPerSpool = {};
+
+  layers.forEach(layer => {
+    // Total inches = Single pass length * 2 (Forward+Return) * Passes * Repeats
+    const inchesUsed = singleHelicalInch * 2 * layer.passes * reps;
+    const yardsUsed = inchesUsed / 36;
+    consumptionPerSpool[layer.threadId] = (consumptionPerSpool[layer.threadId] || 0) + yardsUsed;
+  });
+
+  return consumptionPerSpool;
+}
+
+function updateSpoolCapacity(threadId, val) {
+  spoolCapacities[threadId] = parseFloat(val) || 100;
+  localStorage.setItem(STORAGE_PREFIX + "caps", JSON.stringify(spoolCapacities));
+  renderThreadLibrary();
+}
+
 // DIRECT .VWP FILE HANDLER FOR ANDROID TABLETS
 function handleVwpFileUpload(event) {
   const file = event.target.files && event.target.files[0];
@@ -1894,6 +2107,7 @@ function generateWrapSheet() {
 
   const repeatInterval = totLen / reps;
   const axisStep = repeatInterval / axis;
+  const consumption = calculateThreadConsumption();
 
   let html = `
     <div style="background:#11141c; padding:14px; border-radius:6px; margin-bottom:14px; border:1px solid var(--border-color);">
@@ -1906,44 +2120,22 @@ function generateWrapSheet() {
       </p>
     </div>
     <table>
-      <tr><th>Band #</th><th>Spool & Color</th><th>Geometry</th><th>Pass Count</th><th>Physical Placement Rule & Helical Route</th></tr>
+      <tr><th>Band #</th><th>Spool & Color</th><th>Passes (Threads)</th><th>Estimated Usage</th><th>Physical Placement & Helical Route</th></tr>
   `;
 
   layers.forEach((l, idx) => {
     const thread = getThreadInfo(l.threadId);
+    const yardsUsed = (consumption[l.threadId] || 0).toFixed(1);
     
-    let routeDesc = "";
-    if (axis === 4) {
-      routeDesc = `
-        <strong>Forward:</strong> Start @ Butt 0° (0.00${unit}) ➔ 90° (${(axisStep*1).toFixed(2)}${unit}) ➔ 180° (${(axisStep*2).toFixed(2)}${unit}) ➔ 270° (${(axisStep*3).toFixed(2)}${unit}) ➔ Tip (${totLen.toFixed(2)}${unit}).<br/>
-        <strong>Return:</strong> Reverse progression from Tip back to Butt along opposing 90°/270° vectors.
-      `;
-    } else if (axis === 8) {
-      routeDesc = `
-        <strong>Forward:</strong> Start @ 0° ➔ 45° (${(axisStep*1).toFixed(2)}${unit}) ➔ 90° (${(axisStep*2).toFixed(2)}${unit}) ➔ 135° (${(axisStep*3).toFixed(2)}${unit}) ➔ 180° (${(axisStep*4).toFixed(2)}${unit}) ➔ Tip (${totLen.toFixed(2)}${unit}).<br/>
-        <strong>Return:</strong> Reverse 8-Axis progression back to Butt.
-      `;
-    } else {
-      routeDesc = `
-        <strong>Forward:</strong> Start @ 0° Axis (0.00${unit}) ➔ Progress across all ${axis} layout marks @ ${(axisStep).toFixed(2)}${unit} intervals to Tip (${totLen.toFixed(2)}${unit}) ➔ Return Pass.
-      `;
-    }
-
-    let placementText = "";
-    if (l.type === "OUT") {
-      placementText = "<strong>Placement Rule:</strong> Pack threads to the <strong>OUTSIDE</strong> edge of previously wrapped band (expanding away from center cross mark).";
-    } else if (l.type === "IN") {
-      placementText = "<strong>Placement Rule:</strong> Pack threads to the <strong>INSIDE</strong> edge of previously wrapped band (collapsing inward toward center mark).";
-    } else {
-      placementText = "<strong>Placement Rule:</strong> Wrap around the <strong>OUTER PERIMETER</strong> border, passing over top/bottom axes to frame diamond center.";
-    }
+    let routeDesc = `<strong>Forward:</strong> Start @ Butt 0° (0.00${unit}) ➔ Cross ${axis} axes @ ${(axisStep).toFixed(2)}${unit} intervals to Tip (${totLen.toFixed(2)}${unit}) ➔ <strong>Return Pass</strong>.`;
+    let placementText = l.type === "OUT" ? "Pack to <strong>OUTSIDE</strong> edge of previous band (expanding)." : (l.type === "IN" ? "Pack to <strong>INSIDE</strong> edge (collapsing)." : "Wrap <strong>OUTER BORDER</strong> to frame diamond center.");
 
     html += `
       <tr>
         <td><strong>Band ${idx + 1}</strong></td>
         <td><span style="color:${thread.hex}; font-size:1.1rem;">■</span> <strong>${thread.name}</strong></td>
-        <td><strong>${l.geo}</strong> (${l.type})</td>
         <td><strong>${l.passes}</strong> Passes (${l.passes * 2} Threads)</td>
+        <td style="color:var(--accent-cyan); font-weight:600;">${yardsUsed} Yds</td>
         <td style="font-size:0.78rem; line-height:1.4;">
           <div style="color:#00ffaa; margin-bottom:4px;">${placementText}</div>
           ${routeDesc}
@@ -2064,9 +2256,9 @@ function copyScript() {
   navigator.clipboard.writeText(text).then(() => alert("VisualWRAP script copied to clipboard!"));
 }
 
-// INVENTORY & BACKUP
+// INVENTORY & BACKUP WITH LIVE YARDAGE METERS
 function exportInventory() {
-  const data = { owned: ownedThreads, custom: customShopSpools };
+  const data = { owned: ownedThreads, custom: customShopSpools, caps: spoolCapacities };
   const a = document.createElement('a');
   a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
   a.download = "rod_thread_inventory.json";
@@ -2084,7 +2276,9 @@ function importInventory(e) {
       else if (p.owned) {
         ownedThreads = p.owned || [];
         customShopSpools = p.custom || [];
+        spoolCapacities = p.caps || {};
         localStorage.setItem(STORAGE_PREFIX + "custom", JSON.stringify(customShopSpools));
+        localStorage.setItem(STORAGE_PREFIX + "caps", JSON.stringify(spoolCapacities));
         masterThreadCatalog = [...DEFAULT_CATALOG, ...customShopSpools];
       }
       localStorage.setItem(STORAGE_PREFIX + "owned", JSON.stringify(ownedThreads));
@@ -2099,7 +2293,10 @@ function importInventory(e) {
 
 function toggleOwnThread(id) {
   if (ownedThreads.includes(id)) ownedThreads = ownedThreads.filter(t => t !== id);
-  else ownedThreads.push(id);
+  else {
+    ownedThreads.push(id);
+    if (!spoolCapacities[id]) spoolCapacities[id] = 100;
+  }
   localStorage.setItem(STORAGE_PREFIX + "owned", JSON.stringify(ownedThreads));
   renderThreadLibrary();
   renderLayersUI();
@@ -2116,6 +2313,8 @@ function renderThreadLibrary() {
   const cEl = document.getElementById('inventoryCount');
   if (cEl) cEl.textContent = `${ownedThreads.length} Spools Owned`;
 
+  const consumption = calculateThreadConsumption();
+
   const filtered = masterThreadCatalog.filter(t => {
     return (brand === "ALL" || t.brand === brand) &&
       (owned === "ALL" || ownedThreads.includes(t.id)) &&
@@ -2124,15 +2323,38 @@ function renderThreadLibrary() {
 
   grid.innerHTML = filtered.map(t => {
     const isOwned = ownedThreads.includes(t.id);
+    const capacity = spoolCapacities[t.id] || 100;
+    const yardsUsed = consumption[t.id] || 0;
+    const remainingYards = Math.max(0, capacity - yardsUsed);
+    const percentLeft = Math.max(0, Math.min(100, (remainingYards / capacity) * 100));
+
     return `
       <div class="thread-card ${isOwned ? 'owned' : ''}">
-        <div class="thread-swatch" style="background: ${t.hex};"></div>
-        <div class="thread-info">
-          <div class="brand-tag">${t.brand}</div>
-          <div class="thread-name">${t.name}</div>
-          <div class="thread-code">Code: ${t.code}</div>
+        <div class="thread-card-top">
+          <div class="thread-swatch" style="background: ${t.hex};"></div>
+          <div class="thread-info">
+            <div class="brand-tag">${t.brand}</div>
+            <div class="thread-name">${t.name}</div>
+            <div class="thread-code">Code: ${t.code}</div>
+          </div>
+          <input type="checkbox" ${isOwned ? 'checked' : ''} onchange="toggleOwnThread('${t.id}')" style="width:18px; height:18px; cursor:pointer;" />
         </div>
-        <input type="checkbox" ${isOwned ? 'checked' : ''} onchange="toggleOwnThread('${t.id}')" style="width:18px; height:18px; cursor:pointer;" />
+        ${isOwned ? `
+          <div style="font-size:0.7rem; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+            <span>Spool: 
+              <select onchange="updateSpoolCapacity('${t.id}', this.value)" style="padding:1px 3px; font-size:0.7rem; width:auto; display:inline-block;">
+                <option value="100" ${capacity===100?'selected':''}>100 Yd</option>
+                <option value="250" ${capacity===250?'selected':''}>250 Yd</option>
+                <option value="500" ${capacity===500?'selected':''}>500 Yd</option>
+                <option value="1000" ${capacity===1000?'selected':''}>1000 Yd</option>
+              </select>
+            </span>
+            <span style="color:${remainingYards < 15 ? '#e63946' : 'var(--accent-cyan)'}; font-weight:bold;">${remainingYards.toFixed(1)} Yds Left</span>
+          </div>
+          <div class="thread-meter-bar">
+            <div class="thread-meter-fill" style="width: ${percentLeft}%; background: ${remainingYards < 15 ? '#e63946' : 'var(--accent-cyan)'};"></div>
+          </div>
+        ` : ''}
       </div>
     `;
   }).join('');
@@ -2151,7 +2373,9 @@ function addCustomSpool() {
   const id = "cust_" + Date.now();
   const newSpool = { id, brand, code, name, hex };
   customShopSpools.push(newSpool);
+  spoolCapacities[id] = 100;
   localStorage.setItem(STORAGE_PREFIX + "custom", JSON.stringify(customShopSpools));
+  localStorage.setItem(STORAGE_PREFIX + "caps", JSON.stringify(spoolCapacities));
   masterThreadCatalog = [...DEFAULT_CATALOG, ...customShopSpools];
 
   if (!ownedThreads.includes(id)) ownedThreads.push(id);
@@ -2193,22 +2417,15 @@ function parseAndSaveVisualWrapScript() {
     }
 
     const axisMatch = clean.match(/AXIS\s*[:=]\s*(\d+)/i) || clean.match(/LAYOUT\s*[:=]\s*(\d+)/i) || clean.match(/GRID\s*[:=]\s*(\d+)/i);
-    if (axisMatch) {
-      detectedAxis = parseInt(axisMatch[1]);
-    }
+    if (axisMatch) detectedAxis = parseInt(axisMatch[1]);
   });
 
   if (!detectedAxis) {
     const fullUpper = (rawText + " " + nameInput).toUpperCase();
-    if (fullUpper.includes("8-POINT") || fullUpper.includes("8-AXIS") || fullUpper.includes("SPIDER") || fullUpper.includes("OCTAGONAL")) {
-      detectedAxis = 8;
-    } else if (fullUpper.includes("6-POINT") || fullUpper.includes("6-AXIS") || fullUpper.includes("HEX")) {
-      detectedAxis = 6;
-    } else if (fullUpper.includes("2-AXIS") || fullUpper.includes("CHEVRON SINGLE")) {
-      detectedAxis = 2;
-    } else {
-      detectedAxis = 4;
-    }
+    if (fullUpper.includes("8-POINT") || fullUpper.includes("8-AXIS") || fullUpper.includes("SPIDER") || fullUpper.includes("OCTAGONAL")) detectedAxis = 8;
+    else if (fullUpper.includes("6-POINT") || fullUpper.includes("6-AXIS") || fullUpper.includes("HEX")) detectedAxis = 6;
+    else if (fullUpper.includes("2-AXIS") || fullUpper.includes("CHEVRON SINGLE")) detectedAxis = 2;
+    else detectedAxis = 4;
   }
 
   lines.forEach(line => {
@@ -2222,17 +2439,12 @@ function parseAndSaveVisualWrapScript() {
       const parts = clean.split('=');
       const key = parts[0].trim().toUpperCase();
       const val = parts.slice(1).join('=').trim();
-      if (/^(T\d+|PASS\d+|LAYER\d+|BAND\d+|LINE\d+|P\d+)$/i.test(key) || val.includes(',')) {
-        clean = val;
-      } else {
-        return;
-      }
+      if (/^(T\d+|PASS\d+|LAYER\d+|BAND\d+|LINE\d+|P\d+)$/i.test(key) || val.includes(',')) clean = val;
+      else return;
     }
 
     if (clean.startsWith('[') && clean.endsWith(']')) return;
-    if (!clean.includes(',') && clean.includes(' ')) {
-      clean = clean.replace(/\s+/g, ',');
-    }
+    if (!clean.includes(',') && clean.includes(' ')) clean = clean.replace(/\s+/g, ',');
 
     const tokens = clean.split(',').map(t => t.trim().toUpperCase()).filter(t => t.length > 0);
     if (tokens.length === 0) return;
@@ -2257,9 +2469,7 @@ function parseAndSaveVisualWrapScript() {
           const cNum = parseInt(tok.replace(/\D/g, ''));
           if (!isNaN(cNum) && cNum > 0) spoolIndex = (cNum - 1) % (defaultSpools.length || 1);
         }
-        if (tIdx > 0 && !isNaN(parseInt(tok)) && parseInt(tok) > 0 && parseInt(tok) <= 200) {
-          passes = parseInt(tok);
-        }
+        if (tIdx > 0 && !isNaN(parseInt(tok)) && parseInt(tok) > 0 && parseInt(tok) <= 200) passes = parseInt(tok);
       });
     } else {
       const numbers = tokens.map(t => parseInt(t.replace(/\D/g, ''))).filter(n => !isNaN(n));
@@ -2280,17 +2490,11 @@ function parseAndSaveVisualWrapScript() {
           else if (numbers[3] === 3) direction = "BOX";
         }
 
-        if (numbers.length >= 2 && numbers[1] > 0 && numbers[1] <= 100) {
-          passes = numbers[1];
-        } else if (numbers.length >= 6 && numbers[5] > 0 && numbers[5] <= 100) {
-          passes = numbers[5];
-        } else {
-          passes = numbers[numbers.length - 1] || 4;
-        }
+        if (numbers.length >= 2 && numbers[1] > 0 && numbers[1] <= 100) passes = numbers[1];
+        else if (numbers.length >= 6 && numbers[5] > 0 && numbers[5] <= 100) passes = numbers[5];
+        else passes = numbers[numbers.length - 1] || 4;
 
-        if (numbers.length >= 5 && numbers[4] > 0) {
-          spoolIndex = (numbers[4] - 1) % (defaultSpools.length || 1);
-        }
+        if (numbers.length >= 5 && numbers[4] > 0) spoolIndex = (numbers[4] - 1) % (defaultSpools.length || 1);
       }
     }
 
@@ -2312,11 +2516,7 @@ function parseAndSaveVisualWrapScript() {
   }
 
   const finalName = document.getElementById('importPatternName')?.value.trim() || nameInput;
-  const newPattern = {
-    name: finalName,
-    axis: detectedAxis,
-    layers: parsedLayers
-  };
+  const newPattern = { name: finalName, axis: detectedAxis, layers: parsedLayers };
 
   savedPatternLibrary.unshift(newPattern);
   try {
@@ -2415,8 +2615,8 @@ function initApp() {
   toggleSyncMode(true);
   renderPatternLibraryList();
   renderLayersUI();
-  renderThreadLibrary();
   calculateLayout();
+  calculateGuideSpacing();
   syncAllEngines();
 }
 
