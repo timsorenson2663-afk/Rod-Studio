@@ -530,7 +530,7 @@
   </div>
 </div>
 
-<!-- TAB 6: VISUALWRAP IMPORTER WITH ROBUST UNIVERSAL PARSER -->
+<!-- TAB 6: VISUALWRAP IMPORTER WITH UNIVERSAL DUAL PARSER -->
 <div id="panel-imp" class="tab-panel">
   <div class="grid-layout">
     <div>
@@ -661,7 +661,7 @@
           <select id="axisCount" onchange="calculateLayout()">
             <option value="2">2-Axis (Top / Bottom 180°)</option>
             <option value="4" selected>4-Axis (0°, 90°, 180°, 270°)</option>
-            <option value="6">6-Axis (Hex 60°)</option>
+            <option value="6">6-Axis (Hexagonal 60°)</option>
             <option value="8">8-Axis (45° Increments)</option>
           </select>
         </div>
@@ -966,7 +966,7 @@ const DEFAULT_PATTERNS = [
   }
 ];
 
-const STORAGE_PREFIX = "tsp_master_v7_";
+const STORAGE_PREFIX = "tsp_master_v8_";
 let customShopSpools = [];
 let masterThreadCatalog = [...DEFAULT_CATALOG];
 let ownedThreads = [
@@ -2006,7 +2006,7 @@ function addCustomSpool() {
   alert(`Added "${name}"!`);
 }
 
-// ROBUST UNIVERSAL VISUALWRAP PARSER
+// UNIVERSAL DUAL PARSER: HANDLES BOTH TEXT KEYWORDS & NUMERIC CSV ARRAYS
 function parseAndSaveVisualWrapScript() {
   const rawText = document.getElementById('importScriptText')?.value || '';
   const nameInput = document.getElementById('importPatternName')?.value.trim() || ("Imported Pattern " + (savedPatternLibrary.length + 1));
@@ -2027,28 +2027,37 @@ function parseAndSaveVisualWrapScript() {
 
     // Strip inline comments starting with ;, //, or #
     clean = clean.split(';')[0].split('//')[0].split('#')[0].trim();
-    if (!clean || clean.startsWith('[') || clean.startsWith('=')) return;
+    if (!clean) return;
 
-    // Detect Axis
-    const axisMatch = clean.match(/AXIS\s*=\s*(\d+)/i);
+    // Check for explicit Axis command
+    const axisMatch = clean.match(/AXIS\s*[:=]\s*(\d+)/i);
     if (axisMatch) {
       detectedAxis = parseInt(axisMatch[1]) || 4;
       return;
     }
 
+    // Ignore non-sequence block headers
+    if (clean.startsWith('[') && clean.endsWith(']')) return;
+    if (clean.includes('=') && !clean.includes(',')) return;
+
     // Split CSV tokens
     const tokens = clean.split(',').map(t => t.trim().toUpperCase());
-    const command = tokens[0];
+    if (tokens.length < 2) return;
 
-    if (["CROSS", "BOX", "CHEVRON", "OFFSET", "DIAMOND", "STAR", "WRAP"].includes(command)) {
-      let geo = "CROSS";
-      if (command === "BOX") geo = "BOX";
-      else if (command === "CHEVRON") geo = "CHEVRON";
-      else if (command === "OFFSET") geo = "OFFSET";
+    let geo = "CROSS";
+    let direction = "OUT";
+    let passes = 4;
+    let spoolIndex = parsedLayers.length % (defaultSpools.length || 1);
+    let isValidLine = false;
 
-      let direction = "OUT";
-      let passes = 4;
-      let spoolIndex = parsedLayers.length % (defaultSpools.length || 1);
+    const firstToken = tokens[0];
+
+    // FORMAT A: Standard Keyword Syntax (e.g. CROSS, 50, 50, COLOR_1, OUT, 1, 4)
+    if (["CROSS", "BOX", "CHEVRON", "OFFSET", "DIAMOND", "STAR", "WRAP"].includes(firstToken)) {
+      isValidLine = true;
+      if (firstToken === "BOX") geo = "BOX";
+      else if (firstToken === "CHEVRON") geo = "CHEVRON";
+      else if (firstToken === "OFFSET") geo = "OFFSET";
 
       tokens.forEach((tok, tIdx) => {
         if (tok === "IN" || tok === "OUT" || tok === "BOX") direction = tok;
@@ -2056,12 +2065,44 @@ function parseAndSaveVisualWrapScript() {
           const cNum = parseInt(tok.replace(/\D/g, ''));
           if (!isNaN(cNum) && cNum > 0) spoolIndex = (cNum - 1) % (defaultSpools.length || 1);
         }
-        // Last numerical parameter is always pass count
         if (tIdx > 0 && !isNaN(parseInt(tok)) && parseInt(tok) > 0 && parseInt(tok) <= 200) {
           passes = parseInt(tok);
         }
       });
+    }
+    // FORMAT B: ThreadCentral / Dave Boyle Numeric Table (e.g. 1, 50, 50, 1, 1, 6, 2)
+    else if (!isNaN(parseInt(firstToken))) {
+      // Numerical parameter mapping
+      const nums = tokens.map(t => parseInt(t.replace(/\D/g, ''))).filter(n => !isNaN(n));
+      if (nums.length >= 3) {
+        isValidLine = true;
 
+        // VisualWRAP geometry code: 1=Cross, 2=Box, 3=Chevron, 4=Offset
+        const geoCode = (nums.length >= 4) ? nums[3] : 1;
+        if (geoCode === 2) geo = "BOX";
+        else if (geoCode === 3) geo = "CHEVRON";
+        else if (geoCode === 4) geo = "OFFSET";
+
+        // Direction code: 1=OUT, 2=IN, 3=BOX
+        const dirCode = (nums.length >= 5) ? nums[4] : 1;
+        if (dirCode === 2) direction = "IN";
+        else if (dirCode === 3) direction = "BOX";
+
+        // Pass count is usually the 6th parameter, or last valid integer
+        if (nums.length >= 6 && nums[5] > 0) {
+          passes = nums[5];
+        } else if (nums[nums.length - 1] > 0 && nums[nums.length - 1] <= 100) {
+          passes = nums[nums.length - 1];
+        }
+
+        // Color index is usually 7th param
+        if (nums.length >= 7 && nums[6] > 0) {
+          spoolIndex = (nums[6] - 1) % (defaultSpools.length || 1);
+        }
+      }
+    }
+
+    if (isValidLine) {
       const selectedSpool = defaultSpools[spoolIndex] || masterThreadCatalog[0];
       parsedLayers.push({
         threadId: selectedSpool.id,
@@ -2074,7 +2115,7 @@ function parseAndSaveVisualWrapScript() {
   });
 
   if (parsedLayers.length === 0) {
-    alert("Could not find valid VisualWRAP geometric passes (CROSS, BOX, CHEVRON, OFFSET) in this file.");
+    alert("Could not extract wrapping passes from this file. Please check that the file is an unencrypted VisualWRAP .vwp text script.");
     return;
   }
 
@@ -2084,13 +2125,11 @@ function parseAndSaveVisualWrapScript() {
     layers: parsedLayers
   };
 
-  // Save to Database
   savedPatternLibrary.unshift(newPattern);
   try {
     localStorage.setItem(STORAGE_PREFIX + "pats", JSON.stringify(savedPatternLibrary));
   } catch (e) {}
 
-  // Load and populate directly into the active workbench
   currentPatternTitle = newPattern.name;
   layers = JSON.parse(JSON.stringify(newPattern.layers));
   const axEl = document.getElementById('patternAxis');
@@ -2099,6 +2138,10 @@ function parseAndSaveVisualWrapScript() {
   renderPatternLibraryList();
   renderLayersUI();
   syncAllEngines();
+
+  // Auto-switch to workbench so user immediately sees imported animation
+  const stepRadio = document.getElementById('t-step');
+  if (stepRadio) stepRadio.checked = true;
 
   alert(`Successfully loaded "${nameInput}" with ${parsedLayers.length} thread bands into your workbench!`);
 }
