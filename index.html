@@ -230,12 +230,12 @@
       background: #0b0e14;
       border: 1px solid var(--accent-cyan);
       border-radius: 6px;
-      padding: 10px 14px;
+      padding: 12px 14px;
       margin-top: 10px;
       width: 100%;
-      font-family: monospace;
       font-size: 0.82rem;
       color: var(--accent-cyan);
+      line-height: 1.5;
     }
     .waypoint-hud strong { color: #fff; }
     .waypoint-hud .badge {
@@ -246,6 +246,14 @@
       color: var(--accent-gold);
       font-weight: bold;
       margin-right: 6px;
+    }
+    .placement-instruction {
+      display: block;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed rgba(0, 210, 255, 0.25);
+      color: #00ffaa;
+      font-weight: 600;
     }
 
     .step-controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
@@ -443,13 +451,14 @@
   </div>
 </div>
 
-<!-- TAB 2: ANIMATED WORKBENCH -->
+<!-- TAB 2: ANIMATED WORKBENCH WITH CLEAR PLACEMENT CUES -->
 <div id="panel-step" class="tab-panel">
   <div class="step-banner">
     <div class="step-info" style="flex: 1 1 100%;">
       <h3 id="stepHeader">Step 0 of 0: Ready to Wrap</h3>
       <p id="stepSubtext">Click "Play Slow Motion" or "Next Thread" to start laying down threads.</p>
       
+      <!-- LIVE TELEMETRY HUD -->
       <div class="waypoint-hud" id="waypointHud">
         <span class="badge">READY</span> Select a thread to calculate active start point, helical rotation, and axial crossing marks.
       </div>
@@ -1000,7 +1009,7 @@ const DEFAULT_PATTERNS = [
   }
 ];
 
-const STORAGE_PREFIX = "tsp_master_v11_";
+const STORAGE_PREFIX = "tsp_master_v12_";
 let customShopSpools = [];
 let masterThreadCatalog = [...DEFAULT_CATALOG];
 let ownedThreads = [
@@ -1536,10 +1545,25 @@ function renderStepCanvas() {
     let pt4 = `270° (${(axDist * 3).toFixed(2)}${unit})`;
     let ptEnd = `Tip End (${totLen.toFixed(2)}${unit})`;
 
+    // BEGINNER-FRIENDLY PLACEMENT CUES
+    let placementCue = "";
+    if (active.type === "OUT") {
+      placementCue = "🎯 PLACEMENT: Lay this thread to the OUTSIDE edge of previous wraps (expanding away from center cross mark). Pack tightly.";
+    } else if (active.type === "IN") {
+      placementCue = "🎯 PLACEMENT: Lay this thread to the INSIDE edge of previous wraps (collapsing inward to fill gap toward center mark).";
+    } else {
+      placementCue = "🎯 PLACEMENT: Lay along the OUTER PERIMETER border, passing over top and bottom axes to frame the diamond center.";
+    }
+
     if (hudEl) {
       hudEl.innerHTML = `
-        <span class="badge">ACTIVE ROUTE</span> 
-        <strong>Start:</strong> Butt Top ${pt1} ➔ <strong>Cross:</strong> ${pt2} ➔ <strong>Cross:</strong> ${pt3} ➔ <strong>Cross:</strong> ${pt4} ➔ <strong>To:</strong> ${ptEnd} ➔ <strong>Return Pass</strong> to Butt.
+        <div>
+          <span class="badge">ACTIVE ROUTE</span> 
+          <strong>Start:</strong> Butt Top ${pt1} ➔ <strong>Cross:</strong> ${pt2} ➔ <strong>Cross:</strong> ${pt3} ➔ <strong>Cross:</strong> ${pt4} ➔ <strong>To:</strong> ${ptEnd} ➔ <strong>Return Pass</strong> back to Butt.
+        </div>
+        <div class="placement-instruction">
+          ${placementCue}
+        </div>
       `;
     }
   }
@@ -1882,7 +1906,7 @@ function generateWrapSheet() {
       </p>
     </div>
     <table>
-      <tr><th>Band #</th><th>Spool & Color</th><th>Geometry</th><th>Pass Count</th><th>Step-by-Step Axial Waypoint Progression</th></tr>
+      <tr><th>Band #</th><th>Spool & Color</th><th>Geometry</th><th>Pass Count</th><th>Physical Placement Rule & Helical Route</th></tr>
   `;
 
   layers.forEach((l, idx) => {
@@ -1891,18 +1915,27 @@ function generateWrapSheet() {
     let routeDesc = "";
     if (axis === 4) {
       routeDesc = `
-        <strong>Forward Pass:</strong> Start @ Butt 0° (Top, 0.00${unit}) ➔ Cross 90° @ ${(axisStep * 1).toFixed(2)}${unit} ➔ Cross 180° (Bot) @ ${(axisStep * 2).toFixed(2)}${unit} ➔ Cross 270° @ ${(axisStep * 3).toFixed(2)}${unit} ➔ Cross 0° @ ${(axisStep * 4).toFixed(2)}${unit}... Repeat to Tip (${totLen.toFixed(2)}${unit}).<br/>
-        <strong>Return Pass:</strong> Reverse progression from Tip End back to Butt along opposing 90°/270° vectors.
+        <strong>Forward:</strong> Start @ Butt 0° (0.00${unit}) ➔ 90° (${(axisStep*1).toFixed(2)}${unit}) ➔ 180° (${(axisStep*2).toFixed(2)}${unit}) ➔ 270° (${(axisStep*3).toFixed(2)}${unit}) ➔ Tip (${totLen.toFixed(2)}${unit}).<br/>
+        <strong>Return:</strong> Reverse progression from Tip back to Butt along opposing 90°/270° vectors.
       `;
     } else if (axis === 8) {
       routeDesc = `
-        <strong>Forward Pass:</strong> Start @ Butt 0° ➔ 45° (${(axisStep*1).toFixed(2)}${unit}) ➔ 90° (${(axisStep*2).toFixed(2)}${unit}) ➔ 135° (${(axisStep*3).toFixed(2)}${unit}) ➔ 180° (${(axisStep*4).toFixed(2)}${unit}) ➔ Tip (${totLen.toFixed(2)}${unit}).<br/>
-        <strong>Return Pass:</strong> Reverse 8-Axis progression back to Butt.
+        <strong>Forward:</strong> Start @ 0° ➔ 45° (${(axisStep*1).toFixed(2)}${unit}) ➔ 90° (${(axisStep*2).toFixed(2)}${unit}) ➔ 135° (${(axisStep*3).toFixed(2)}${unit}) ➔ 180° (${(axisStep*4).toFixed(2)}${unit}) ➔ Tip (${totLen.toFixed(2)}${unit}).<br/>
+        <strong>Return:</strong> Reverse 8-Axis progression back to Butt.
       `;
     } else {
       routeDesc = `
-        <strong>Forward Pass:</strong> Start @ 0° Axis (0.00${unit}) ➔ Progress across all ${axis} layout marks @ ${(axisStep).toFixed(2)}${unit} intervals to Tip End (${totLen.toFixed(2)}${unit}) ➔ Return Pass.
+        <strong>Forward:</strong> Start @ 0° Axis (0.00${unit}) ➔ Progress across all ${axis} layout marks @ ${(axisStep).toFixed(2)}${unit} intervals to Tip (${totLen.toFixed(2)}${unit}) ➔ Return Pass.
       `;
+    }
+
+    let placementText = "";
+    if (l.type === "OUT") {
+      placementText = "<strong>Placement Rule:</strong> Pack threads to the <strong>OUTSIDE</strong> edge of previously wrapped band (expanding away from center cross mark).";
+    } else if (l.type === "IN") {
+      placementText = "<strong>Placement Rule:</strong> Pack threads to the <strong>INSIDE</strong> edge of previously wrapped band (collapsing inward toward center mark).";
+    } else {
+      placementText = "<strong>Placement Rule:</strong> Wrap around the <strong>OUTER PERIMETER</strong> border, passing over top/bottom axes to frame diamond center.";
     }
 
     html += `
@@ -1910,8 +1943,11 @@ function generateWrapSheet() {
         <td><strong>Band ${idx + 1}</strong></td>
         <td><span style="color:${thread.hex}; font-size:1.1rem;">■</span> <strong>${thread.name}</strong></td>
         <td><strong>${l.geo}</strong> (${l.type})</td>
-        <td><strong>${l.passes}</strong> Passes</td>
-        <td style="font-size:0.78rem; line-height:1.4;">${routeDesc}</td>
+        <td><strong>${l.passes}</strong> Passes (${l.passes * 2} Threads)</td>
+        <td style="font-size:0.78rem; line-height:1.4;">
+          <div style="color:#00ffaa; margin-bottom:4px;">${placementText}</div>
+          ${routeDesc}
+        </td>
       </tr>
     `;
   });
@@ -1943,7 +1979,6 @@ function calculateLayout() {
 
   const isSynced = document.getElementById('syncWithDesigner')?.checked ?? true;
 
-  // Auto-sync values from Tab 1 if enabled
   if (isSynced) {
     const designerReps = document.getElementById('repeats')?.value || 4;
     const designerUnit = document.getElementById('wrapUnit')?.value || 'in';
@@ -2145,7 +2180,6 @@ function parseAndSaveVisualWrapScript() {
   let detectedAxis = null;
   const defaultSpools = masterThreadCatalog.filter(t => ownedThreads.includes(t.id));
 
-  // 1. Scan for explicit Title and Axis tags
   lines.forEach(line => {
     let clean = line.trim();
     if (!clean) return;
@@ -2164,7 +2198,6 @@ function parseAndSaveVisualWrapScript() {
     }
   });
 
-  // 2. Intelligent Auto-Axis Fallback Detection
   if (!detectedAxis) {
     const fullUpper = (rawText + " " + nameInput).toUpperCase();
     if (fullUpper.includes("8-POINT") || fullUpper.includes("8-AXIS") || fullUpper.includes("SPIDER") || fullUpper.includes("OCTAGONAL")) {
@@ -2178,7 +2211,6 @@ function parseAndSaveVisualWrapScript() {
     }
   }
 
-  // 3. Extract Wrapping Passes Across All Known Syntaxes
   lines.forEach(line => {
     let clean = line.trim();
     if (!clean) return;
