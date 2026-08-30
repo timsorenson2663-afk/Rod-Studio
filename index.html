@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Thread Studio Pro - VisualWRAP & Custom Rod Suite</title>
+  <title>Thread Studio Pro - Yellow Rose Custom Rods</title>
   <style>
     :root {
       --bg-dark: #0e1117;
@@ -462,7 +462,7 @@
   <label for="t-step" class="tab-label" onclick="syncAllEngines()">2. 🎬 Animated Workbench</label>
   <label for="t-3d" class="tab-label" onclick="syncAllEngines()">3. 🌐 3D Rod Simulator</label>
   <label for="t-gcolor" class="tab-label" onclick="renderGuideColorCoordinator()">4. 🎨 Guide Color Schemes</label>
-  <label for="t-vault" class="tab-label" onclick="renderVaultLists()">5. 📂 Rod & Build Vault</label>
+  <label for="t-vault" class="tab-label" onclick="renderVaultLists()">5. 📂 Rod & Master Vault</label>
   <label for="t-sheet" class="tab-label" onclick="generateWrapSheet()">6. 📋 Wrap Instruction Sheet</label>
   <label for="t-guide" class="tab-label" onclick="calculateGuideSpacing()">7. 🎣 Guide & Spiral Spacing</label>
   <label for="t-gloss" class="tab-label" onclick="syncAllEngines()">8. 📖 Thread Glossary</label>
@@ -686,8 +686,20 @@
   </div>
 </div>
 
-<!-- TAB 5: ROD BLANK & COMPLETE BUILD VAULT -->
+<!-- TAB 5: ROD BLANK & MASTER VAULT (WITH MASTER BACKUP/RESTORE) -->
 <div id="panel-vault" class="tab-panel">
+  <div style="background:#131722; border:1px solid var(--accent-gold); border-radius:8px; padding:14px; margin-bottom:16px;">
+    <h3 style="color:var(--accent-gold); font-size:1rem; margin-bottom:4px;">🛡️ Master Shop Backup & Restore Center</h3>
+    <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:10px;">
+      Backs up your <strong>entire application state</strong> into one file: Thread Inventory, Custom Spools, Spool Yardages, Saved Blank Profiles, Complete Build Recipes, and Saved Patterns.
+    </p>
+    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+      <button type="button" class="btn btn-sm" onclick="exportMasterMasterBackup()">💾 Download Master Backup File (.json)</button>
+      <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('importMasterFile').click()">📂 Restore from Master Backup</button>
+      <input type="file" id="importMasterFile" style="display:none;" accept=".json" onchange="importMasterMasterBackup(event)" />
+    </div>
+  </div>
+
   <div class="grid-layout">
     <div>
       <div class="card">
@@ -1176,7 +1188,7 @@ const DEFAULT_PATTERNS = [
   }
 ];
 
-const STORAGE_PREFIX = "tsp_master_v16_";
+const STORAGE_PREFIX = "tsp_master_v18_";
 let customShopSpools = [];
 let masterThreadCatalog = [...DEFAULT_CATALOG];
 let ownedThreads = [
@@ -2267,6 +2279,229 @@ function renderGuideColorCoordinator() {
   });
 }
 
+// VAULT: BLANKS & BUILDS
+function saveBlankToVault() {
+  const name = document.getElementById('blankModelName')?.value.trim();
+  const len = parseFloat(document.getElementById('blankVaultLen')?.value || 7.0);
+  const butt = parseFloat(document.getElementById('blankVaultButt')?.value || 0.520);
+  const tip = parseFloat(document.getElementById('blankVaultTip')?.value || 0.410);
+  const gCount = parseInt(document.getElementById('blankVaultGuides')?.value || 9);
+
+  if (!name) { alert("Please enter a blank model name."); return; }
+
+  savedBlanksVault.unshift({ id: "blk_" + Date.now(), name, length: len, buttD: butt, tipD: tip, guides: gCount });
+  localStorage.setItem(STORAGE_PREFIX + "blanks", JSON.stringify(savedBlanksVault));
+  renderVaultLists();
+  alert(`Saved blank profile "${name}"!`);
+}
+
+function loadBlankFromVault(idx) {
+  const b = savedBlanksVault[idx];
+  if (!b) return;
+
+  const bInput = document.getElementById('buttDiam');
+  const tInput = document.getElementById('tipDiam');
+  const rLenInput = document.getElementById('rodTotalLength');
+  const gCountInput = document.getElementById('totalGuides');
+
+  if (bInput) bInput.value = b.buttD;
+  if (tInput) tInput.value = b.tipD;
+  if (rLenInput) rLenInput.value = b.length;
+  if (gCountInput) gCountInput.value = b.guides;
+
+  calculateLayout();
+  calculateGuideSpacing();
+  syncAllEngines();
+  alert(`Loaded blank specs for "${b.name}"!`);
+}
+
+function deleteBlankFromVault(idx) {
+  savedBlanksVault.splice(idx, 1);
+  localStorage.setItem(STORAGE_PREFIX + "blanks", JSON.stringify(savedBlanksVault));
+  renderVaultLists();
+}
+
+function saveCompleteBuildRecipe() {
+  const recipeName = document.getElementById('buildRecipeName')?.value.trim();
+  if (!recipeName) { alert("Please enter a name for this build recipe."); return; }
+
+  const snapshot = {
+    id: "bld_" + Date.now(),
+    name: recipeName,
+    date: new Date().toLocaleDateString(),
+    blank: {
+      buttD: parseFloat(document.getElementById('buttDiam')?.value || 0.520),
+      tipD: parseFloat(document.getElementById('tipDiam')?.value || 0.410),
+      length: parseFloat(document.getElementById('rodTotalLength')?.value || 7.0),
+      guides: parseInt(document.getElementById('totalGuides')?.value || 9),
+      guideStyle: document.getElementById('guideWrapStyle')?.value || 'SPIRAL_SIMPLE'
+    },
+    pattern: {
+      name: currentPatternTitle,
+      axis: parseInt(document.getElementById('patternAxis')?.value || 4),
+      repeats: parseInt(document.getElementById('repeats')?.value || 4),
+      length: parseFloat(document.getElementById('targetWrapLength')?.value || 6.0),
+      layers: JSON.parse(JSON.stringify(layers))
+    },
+    guideColors: {
+      main: document.getElementById('gColor_main')?.value || layers[0]?.threadId,
+      inlay1: document.getElementById('gColor_inlay1')?.value || layers[1]?.threadId,
+      inlay2: document.getElementById('gColor_inlay2')?.value || layers[2]?.threadId,
+      trim: document.getElementById('gColor_trim')?.value || layers[3]?.threadId
+    }
+  };
+
+  savedBuildRecipes.unshift(snapshot);
+  localStorage.setItem(STORAGE_PREFIX + "builds", JSON.stringify(savedBuildRecipes));
+  renderVaultLists();
+  alert(`Saved complete build recipe for "${recipeName}"!`);
+}
+
+function loadCompleteBuildRecipe(idx) {
+  const r = savedBuildRecipes[idx];
+  if (!r) return;
+
+  const bInput = document.getElementById('buttDiam');
+  const tInput = document.getElementById('tipDiam');
+  const rLenInput = document.getElementById('rodTotalLength');
+  const gCountInput = document.getElementById('totalGuides');
+  const gStyleInput = document.getElementById('guideWrapStyle');
+
+  if (bInput) bInput.value = r.blank.buttD;
+  if (tInput) tInput.value = r.blank.tipD;
+  if (rLenInput) rLenInput.value = r.blank.length;
+  if (gCountInput) gCountInput.value = r.blank.guides;
+  if (gStyleInput) gStyleInput.value = r.blank.guideStyle;
+
+  currentPatternTitle = r.pattern.name;
+  layers = JSON.parse(JSON.stringify(r.pattern.layers));
+  const axEl = document.getElementById('patternAxis');
+  const repEl = document.getElementById('repeats');
+  const lenEl = document.getElementById('targetWrapLength');
+
+  if (axEl) axEl.value = r.pattern.axis;
+  if (repEl) repEl.value = r.pattern.repeats;
+  if (lenEl) lenEl.value = r.pattern.length;
+
+  const gM = document.getElementById('gColor_main');
+  const gI1 = document.getElementById('gColor_inlay1');
+  const gI2 = document.getElementById('gColor_inlay2');
+  const gT = document.getElementById('gColor_trim');
+
+  if (gM && r.guideColors) gM.value = r.guideColors.main;
+  if (gI1 && r.guideColors) gI1.value = r.guideColors.inlay1;
+  if (gI2 && r.guideColors) gI2.value = r.guideColors.inlay2;
+  if (gT && r.guideColors) gT.value = r.guideColors.trim;
+
+  renderLayersUI();
+  calculateLayout();
+  calculateGuideSpacing();
+  syncAllEngines();
+  alert(`Loaded complete build "${r.name}"!`);
+}
+
+function deleteCompleteBuildRecipe(idx) {
+  if (confirm(`Delete "${savedBuildRecipes[idx].name}"?`)) {
+    savedBuildRecipes.splice(idx, 1);
+    localStorage.setItem(STORAGE_PREFIX + "builds", JSON.stringify(savedBuildRecipes));
+    renderVaultLists();
+  }
+}
+
+function renderVaultLists() {
+  const bList = document.getElementById('blankVaultList');
+  if (bList) {
+    bList.innerHTML = savedBlanksVault.map((b, idx) => `
+      <div class="vault-card">
+        <div>
+          <h3>${b.name}</h3>
+          <p>${b.length}'0" • Butt: ${b.buttD}" • Tip: ${b.tipD}" • ${b.guides} Guides</p>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button type="button" class="btn btn-outline btn-sm" onclick="loadBlankFromVault(${idx})">Load</button>
+          <button type="button" class="btn btn-danger btn-sm" onclick="deleteBlankFromVault(${idx})">&times;</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  const rList = document.getElementById('buildRecipeList');
+  if (rList) {
+    if (savedBuildRecipes.length === 0) {
+      rList.innerHTML = `<p style="font-size:0.8rem; color:var(--text-muted);">No complete build snapshots saved yet.</p>`;
+    } else {
+      rList.innerHTML = savedBuildRecipes.map((r, idx) => `
+        <div class="vault-card">
+          <div>
+            <h3>${r.name}</h3>
+            <p>Saved: ${r.date} • Blank: ${r.blank.length}' (${r.blank.buttD}"/${r.blank.tipD}") • Pattern: ${r.pattern.name} (${r.pattern.layers.length} Bands)</p>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="btn btn-outline btn-sm" onclick="loadCompleteBuildRecipe(${idx})">Restore Build</button>
+            <button type="button" class="btn btn-danger btn-sm" onclick="deleteCompleteBuildRecipe(${idx})">&times;</button>
+          </div>
+        </div>
+      `).join('');
+    }
+  }
+}
+
+// MASTER MASTER BACKUP & RESTORE
+function exportMasterMasterBackup() {
+  const masterData = {
+    owned: ownedThreads,
+    custom: customShopSpools,
+    caps: spoolCapacities,
+    deds: manualDeductions,
+    blanks: savedBlanksVault,
+    builds: savedBuildRecipes,
+    patterns: savedPatternLibrary
+  };
+  const a = document.createElement('a');
+  a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(masterData));
+  a.download = "yellow_rose_custom_rods_master_backup.json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function importMasterMasterBackup(e) {
+  const r = new FileReader();
+  r.onload = function(evt) {
+    try {
+      const p = JSON.parse(evt.target.result);
+      if (p.owned) ownedThreads = p.owned;
+      if (p.custom) {
+        customShopSpools = p.custom;
+        masterThreadCatalog = [...DEFAULT_CATALOG, ...customShopSpools];
+      }
+      if (p.caps) spoolCapacities = p.caps;
+      if (p.deds) manualDeductions = p.deds;
+      if (p.blanks) savedBlanksVault = p.blanks;
+      if (p.builds) savedBuildRecipes = p.builds;
+      if (p.patterns) savedPatternLibrary = p.patterns;
+
+      localStorage.setItem(STORAGE_PREFIX + "owned", JSON.stringify(ownedThreads));
+      localStorage.setItem(STORAGE_PREFIX + "custom", JSON.stringify(customShopSpools));
+      localStorage.setItem(STORAGE_PREFIX + "caps", JSON.stringify(spoolCapacities));
+      localStorage.setItem(STORAGE_PREFIX + "deds", JSON.stringify(manualDeductions));
+      localStorage.setItem(STORAGE_PREFIX + "blanks", JSON.stringify(savedBlanksVault));
+      localStorage.setItem(STORAGE_PREFIX + "builds", JSON.stringify(savedBuildRecipes));
+      localStorage.setItem(STORAGE_PREFIX + "pats", JSON.stringify(savedPatternLibrary));
+
+      renderVaultLists();
+      renderPatternLibraryList();
+      renderThreadLibrary();
+      renderLayersUI();
+      populateGuideColorDropdowns();
+      syncAllEngines();
+
+      alert("Master backup successfully restored! All inventories, vaults, and patterns are reloaded.");
+    } catch (err) { alert("Invalid master backup file."); }
+  };
+  if (e.target.files && e.target.files[0]) r.readAsText(e.target.files[0]);
+}
+
 // GUIDE LAYOUT & SPIRAL ACID WRAP CALCULATOR
 function calculateGuideSpacing() {
   const container = document.getElementById('guideResults');
@@ -2338,599 +2573,6 @@ function calculateGuideSpacing() {
 
   html += `</table>`;
   container.innerHTML = html;
-}
-
-// 1:1 PRINTABLE SCALE TAPER RULER TAPE
-function printScaleTape() {
-  const buttD = parseFloat(document.getElementById('buttDiam')?.value || 0.520);
-  const tipD = parseFloat(document.getElementById('tipDiam')?.value || 0.410);
-  const crosses = parseInt(document.getElementById('targetCrosses')?.value || 4);
-  const axis = parseInt(document.getElementById('axisCount')?.value || 4);
-  const unit = document.getElementById('calcUnit')?.value || "in";
-
-  const buttCirc = buttD * Math.PI;
-  const tipCirc = tipD * Math.PI;
-  const taperDelta = (buttCirc - tipCirc) / crosses;
-
-  let tapeHtml = `
-    <div style="font-family:monospace; padding:10px; border:1px solid #000;">
-      <h2 style="font-size:14px; margin-bottom:4px;">THREAD STUDIO PRO - 1:1 SCALE BLANK ALIGNMENT TAPE</h2>
-      <p style="font-size:10px; margin-bottom:8px;">Butt: ${buttD}" | Tip: ${tipD}" | ${crosses} Crosses | ${axis}-Axis | Scale: 100% True Size</p>
-      <div style="border-top:2px solid #000; border-bottom:2px solid #000; padding:15px 0; position:relative;">
-  `;
-
-  let cumDist = 0;
-  for (let i = 1; i <= crosses; i++) {
-    const interval = buttCirc - (taperDelta * (i - 0.5));
-    cumDist += interval;
-    const axStep = interval / axis;
-    tapeHtml += `
-      <div style="margin-bottom:8px; border-left:3px solid #000; padding-left:6px;">
-        <strong>CROSS ${i} CENTERLINE: ${cumDist.toFixed(3)}${unit}</strong> (Interval: ${interval.toFixed(3)}${unit})<br/>
-        <span style="font-size:9px;">0° [Top] | 90° (+${axStep.toFixed(3)}") | 180° (+${(axStep*2).toFixed(3)}") | 270° (+${(axStep*3).toFixed(3)}")</span>
-      </div>
-    `;
-  }
-
-  tapeHtml += `
-      </div>
-      <p style="font-size:9px; margin-top:8px;">INSTRUCTIONS: Print at 100% scale (No Fit/Shrink). Cut strip along black line, tape along 0° blank axis, wrap over layout marks, and peel tape.</p>
-    </div>
-  `;
-
-  const printArea = document.getElementById('printableTapeArea');
-  if (printArea) {
-    printArea.innerHTML = tapeHtml;
-    window.print();
-  }
-}
-
-// SPOOL CONSUMPTION & YARDAGE TRACKER WITH MANUAL OVERRIDE
-function calculateThreadConsumption() {
-  const reps = parseInt(document.getElementById('repeats')?.value || 4);
-  const totLen = parseFloat(document.getElementById('targetWrapLength')?.value || 6.0);
-  const buttD = parseFloat(document.getElementById('buttDiam')?.value || 0.520);
-  const tipD = parseFloat(document.getElementById('tipDiam')?.value || 0.410);
-  const avgCirc = ((buttD + tipD) / 2) * Math.PI;
-  const singleHelicalInch = Math.sqrt(Math.pow(avgCirc, 2) + Math.pow(totLen / reps, 2));
-
-  const consumptionPerSpool = {};
-
-  layers.forEach(layer => {
-    const inchesUsed = singleHelicalInch * 2 * layer.passes * reps;
-    const yardsUsed = inchesUsed / 36;
-    consumptionPerSpool[layer.threadId] = (consumptionPerSpool[layer.threadId] || 0) + yardsUsed;
-  });
-
-  return consumptionPerSpool;
-}
-
-function updateSpoolCapacity(threadId, val) {
-  spoolCapacities[threadId] = parseFloat(val) || 100;
-  localStorage.setItem(STORAGE_PREFIX + "caps", JSON.stringify(spoolCapacities));
-  renderThreadLibrary();
-}
-
-function updateManualDeduction(threadId, val) {
-  manualDeductions[threadId] = Math.max(0, parseFloat(val) || 0);
-  localStorage.setItem(STORAGE_PREFIX + "deds", JSON.stringify(manualDeductions));
-  renderThreadLibrary();
-}
-
-// DIRECT .VWP FILE HANDLER FOR ANDROID TABLETS
-function handleVwpFileUpload(event) {
-  const file = event.target.files && event.target.files[0];
-  if (!file) return;
-
-  const fileNameClean = file.name.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
-  const nameEl = document.getElementById('importPatternName');
-  if (nameEl) nameEl.value = fileNameClean;
-
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    const textContent = e.target.result;
-    const textEl = document.getElementById('importScriptText');
-    if (textEl) textEl.value = textContent;
-    parseAndSaveVisualWrapScript();
-  };
-  reader.readAsText(file);
-}
-
-// WRAP INSTRUCTION SHEET
-function generateWrapSheet() {
-  const container = document.getElementById('wrapSheetContent');
-  if (!container) return;
-  const axis = parseInt(document.getElementById('patternAxis')?.value || 4);
-  const reps = parseInt(document.getElementById('repeats')?.value || 4);
-  const totLen = parseFloat(document.getElementById('targetWrapLength')?.value || 6.0);
-  const unit = document.getElementById('wrapUnit')?.value || "in";
-
-  const repeatInterval = totLen / reps;
-  const axisStep = repeatInterval / axis;
-  const consumption = calculateThreadConsumption();
-
-  let html = `
-    <div style="background:#11141c; padding:14px; border-radius:6px; margin-bottom:14px; border:1px solid var(--border-color);">
-      <h3 style="color:var(--accent-gold); font-size:1.05rem; margin-bottom:4px;">${currentPatternTitle}</h3>
-      <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:8px;">
-        Layout: <strong>${axis}-Axis</strong> • Repeats: <strong>${reps}</strong> • Target Length: <strong>${totLen.toFixed(2)} ${unit}</strong> (${repeatInterval.toFixed(3)} ${unit} / repeat)
-      </p>
-      <p style="font-size:0.78rem; color:var(--accent-cyan);">
-        Longitudinal Axis Crossing Marks @ every <strong>${axisStep.toFixed(3)} ${unit}</strong> along the rod blank.
-      </p>
-    </div>
-    <table>
-      <tr><th>Band #</th><th>Spool & Color</th><th>Passes (Threads)</th><th>Estimated Usage</th><th>Physical Placement & Helical Route</th></tr>
-  `;
-
-  layers.forEach((l, idx) => {
-    const thread = getThreadInfo(l.threadId);
-    const yardsUsed = (consumption[l.threadId] || 0).toFixed(1);
-    
-    let routeDesc = `<strong>Forward:</strong> Start @ Butt 0° (0.00${unit}) ➔ Cross ${axis} axes @ ${(axisStep).toFixed(2)}${unit} intervals to Tip (${totLen.toFixed(2)}${unit}) ➔ <strong>Return Pass</strong>.`;
-    let placementText = l.type === "OUT" ? "Pack to <strong>OUTSIDE</strong> edge of previous band (expanding)." : (l.type === "IN" ? "Pack to <strong>INSIDE</strong> edge (collapsing)." : "Wrap <strong>OUTER BORDER</strong> to frame diamond center.");
-
-    html += `
-      <tr>
-        <td><strong>Band ${idx + 1}</strong></td>
-        <td><span style="color:${thread.hex}; font-size:1.1rem;">■</span> <strong>${thread.name}</strong></td>
-        <td><strong>${l.passes}</strong> Passes (${l.passes * 2} Threads)</td>
-        <td style="color:var(--accent-cyan); font-weight:600;">${yardsUsed} Yds</td>
-        <td style="font-size:0.78rem; line-height:1.4;">
-          <div style="color:#00ffaa; margin-bottom:4px;">${placementText}</div>
-          ${routeDesc}
-        </td>
-      </tr>
-    `;
-  });
-  html += `</table>`;
-  container.innerHTML = html;
-}
-
-// TAPER CALCULATOR WITH TWO-WAY AUTO-SYNC
-function toggleSyncMode(isSynced) {
-  const crossesInput = document.getElementById('targetCrosses');
-  const unitSelect = document.getElementById('calcUnit');
-  const axisSelect = document.getElementById('axisCount');
-
-  if (isSynced) {
-    if (crossesInput) crossesInput.disabled = true;
-    if (unitSelect) unitSelect.disabled = true;
-    if (axisSelect) axisSelect.disabled = true;
-    calculateLayout();
-  } else {
-    if (crossesInput) crossesInput.disabled = false;
-    if (unitSelect) unitSelect.disabled = false;
-    if (axisSelect) axisSelect.disabled = false;
-  }
-}
-
-function calculateLayout() {
-  const results = document.getElementById('layoutResults');
-  if (!results) return;
-
-  const isSynced = document.getElementById('syncWithDesigner')?.checked ?? true;
-
-  if (isSynced) {
-    const designerReps = document.getElementById('repeats')?.value || 4;
-    const designerUnit = document.getElementById('wrapUnit')?.value || 'in';
-    const designerAxis = document.getElementById('patternAxis')?.value || 4;
-
-    const cInput = document.getElementById('targetCrosses');
-    const uInput = document.getElementById('calcUnit');
-    const aInput = document.getElementById('axisCount');
-
-    if (cInput) { cInput.value = designerReps; cInput.disabled = true; }
-    if (uInput) { uInput.value = designerUnit; uInput.disabled = true; }
-    if (aInput) { aInput.value = designerAxis; aInput.disabled = true; }
-  }
-
-  const unit = document.getElementById('calcUnit')?.value || 'in';
-  const buttD = parseFloat(document.getElementById('buttDiam')?.value || 0.520);
-  const tipD = parseFloat(document.getElementById('tipDiam')?.value || 0.410);
-  const crosses = parseInt(document.getElementById('targetCrosses')?.value || 4);
-  const axis = parseInt(document.getElementById('axisCount')?.value || 4);
-
-  const buttCirc = buttD * Math.PI;
-  const tipCirc = tipD * Math.PI;
-  const taperDelta = (buttCirc - tipCirc) / crosses;
-
-  let html = `
-    <table style="margin-bottom:12px;">
-      <tr><th>Parameter</th><th>Butt Side</th><th>Tip Side</th></tr>
-      <tr><td>Circumference</td><td>${buttCirc.toFixed(3)} ${unit}</td><td>${tipCirc.toFixed(3)} ${unit}</td></tr>
-      <tr><td>Square Spacing</td><td>${buttCirc.toFixed(3)} ${unit}</td><td>${tipCirc.toFixed(3)} ${unit}</td></tr>
-    </table>
-    <h3 style="font-size:0.85rem; color:var(--accent-gold); margin-bottom:6px;">Progressive Taper Axis Marks (${axis}-Axis)</h3>
-    <table>
-      <tr><th>Cross #</th><th>Interval Spacing</th><th>Cumulative Distance</th><th>Axis Offset (${axis} Axis)</th></tr>
-  `;
-
-  let cumDist = 0;
-  for (let i = 1; i <= crosses; i++) {
-    const interval = buttCirc - (taperDelta * (i - 0.5));
-    cumDist += interval;
-    html += `
-      <tr>
-        <td><strong>Cross ${i}</strong></td>
-        <td>${interval.toFixed(3)} ${unit}</td>
-        <td><strong>${cumDist.toFixed(3)} ${unit}</strong></td>
-        <td>${(interval / axis).toFixed(3)} ${unit}</td>
-      </tr>
-    `;
-  }
-  html += `</table>`;
-  results.innerHTML = html;
-
-  const badge = document.getElementById('taperSummaryBadge');
-  if (badge) {
-    badge.innerHTML = `
-      Progressive Taper Total Length: <strong>${cumDist.toFixed(3)} ${unit}</strong> over <strong>${crosses} Crosses</strong><br/>
-      <span style="font-size:0.75rem; color:var(--text-muted);">Calculated using Dale Clemens Progressive Diminishing Spacing Formula.</span>
-    `;
-  }
-}
-
-// EXPORT VISUALWRAP SCRIPT
-function updateVisualWrapScript() {
-  const out = document.getElementById('scriptOutput');
-  if (!out) return;
-  const axis = document.getElementById('patternAxis')?.value || 4;
-  let s = `; VisualWRAP Script Export\n; Pattern: ${currentPatternTitle}\n\n[PATTERN_HEADER]\nTYPE=CROSS_WRAP\nAXIS=${axis}\n\n[SEQUENCE]\n`;
-
-  layers.forEach((l, idx) => {
-    const thread = masterThreadCatalog.find(t => t.id === l.threadId);
-    const comm = thread ? ` ; ${thread.brand} ${thread.code}` : '';
-    const off = l.offset || (idx * 12);
-    if (l.geo === "CROSS") s += `CROSS, 50, 50, COLOR_${idx + 1}, ${l.type}, 1, ${l.passes}${comm}\n`;
-    else if (l.geo === "BOX") s += `BOX, ${50 - off}, 50, ${50 + off}, 50, COLOR_${idx + 1}, ${l.type}, 1, ${l.passes}${comm}\n`;
-    else if (l.geo === "CHEVRON") s += `CHEVRON, 50, 50, COLOR_${idx + 1}, ${l.type}, 1, ${l.passes}${comm}\n`;
-    else s += `OFFSET, 50, 50, COLOR_${idx + 1}, ${l.type}, 1, ${l.passes}${comm}\n`;
-  });
-  s += `\n; End of Pattern`;
-  out.textContent = s;
-}
-
-function copyScript() {
-  const text = document.getElementById('scriptOutput')?.textContent || '';
-  navigator.clipboard.writeText(text).then(() => alert("VisualWRAP script copied to clipboard!"));
-}
-
-// INVENTORY & BACKUP WITH MANUAL OVERRIDES
-function exportInventory() {
-  const data = { owned: ownedThreads, custom: customShopSpools, caps: spoolCapacities, deds: manualDeductions };
-  const a = document.createElement('a');
-  a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
-  a.download = "rod_thread_inventory.json";
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-}
-
-function importInventory(e) {
-  const r = new FileReader();
-  r.onload = function(evt) {
-    try {
-      const p = JSON.parse(evt.target.result);
-      if (Array.isArray(p)) ownedThreads = p;
-      else if (p.owned) {
-        ownedThreads = p.owned || [];
-        customShopSpools = p.custom || [];
-        spoolCapacities = p.caps || {};
-        manualDeductions = p.deds || {};
-        localStorage.setItem(STORAGE_PREFIX + "custom", JSON.stringify(customShopSpools));
-        localStorage.setItem(STORAGE_PREFIX + "caps", JSON.stringify(spoolCapacities));
-        localStorage.setItem(STORAGE_PREFIX + "deds", JSON.stringify(manualDeductions));
-        masterThreadCatalog = [...DEFAULT_CATALOG, ...customShopSpools];
-      }
-      localStorage.setItem(STORAGE_PREFIX + "owned", JSON.stringify(ownedThreads));
-      renderThreadLibrary();
-      renderLayersUI();
-      populateGuideColorDropdowns();
-      syncAllEngines();
-      alert("Inventory restored!");
-    } catch (err) { alert("Invalid backup file."); }
-  };
-  if (event.target.files && event.target.files[0]) r.readAsText(event.target.files[0]);
-}
-
-function toggleOwnThread(id) {
-  if (ownedThreads.includes(id)) ownedThreads = ownedThreads.filter(t => t !== id);
-  else {
-    ownedThreads.push(id);
-    if (!spoolCapacities[id]) spoolCapacities[id] = 100;
-    if (!manualDeductions[id]) manualDeductions[id] = 0;
-  }
-  localStorage.setItem(STORAGE_PREFIX + "owned", JSON.stringify(ownedThreads));
-  renderThreadLibrary();
-  renderLayersUI();
-  syncAllEngines();
-}
-
-function renderThreadLibrary() {
-  const grid = document.getElementById('threadGrid');
-  if (!grid) return;
-  const brand = document.getElementById('brandFilter')?.value || 'ALL';
-  const owned = document.getElementById('ownedFilter')?.value || 'ALL';
-  const search = (document.getElementById('threadSearch')?.value || '').toLowerCase().trim();
-
-  const cEl = document.getElementById('inventoryCount');
-  if (cEl) cEl.textContent = `${ownedThreads.length} Spools Owned`;
-
-  const consumption = calculateThreadConsumption();
-
-  const filtered = masterThreadCatalog.filter(t => {
-    return (brand === "ALL" || t.brand === brand) &&
-      (owned === "ALL" || ownedThreads.includes(t.id)) &&
-      (search === "" || t.name.toLowerCase().includes(search) || t.code.toLowerCase().includes(search) || t.brand.toLowerCase().includes(search));
-  });
-
-  grid.innerHTML = filtered.map(t => {
-    const isOwned = ownedThreads.includes(t.id);
-    const capacity = spoolCapacities[t.id] || 100;
-    const yardsUsedInWrap = consumption[t.id] || 0;
-    const manualDeduct = manualDeductions[t.id] || 0;
-    const remainingYards = Math.max(0, capacity - yardsUsedInWrap - manualDeduct);
-    const percentLeft = Math.max(0, Math.min(100, (remainingYards / capacity) * 100));
-
-    return `
-      <div class="thread-card ${isOwned ? 'owned' : ''}">
-        <div class="thread-card-top">
-          <div class="thread-swatch" style="background: ${t.hex};"></div>
-          <div class="thread-info">
-            <div class="brand-tag">${t.brand}</div>
-            <div class="thread-name">${t.name}</div>
-            <div class="thread-code">Code: ${t.code}</div>
-          </div>
-          <input type="checkbox" ${isOwned ? 'checked' : ''} onchange="toggleOwnThread('${t.id}')" style="width:18px; height:18px; cursor:pointer;" />
-        </div>
-        ${isOwned ? `
-          <div style="font-size:0.7rem; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-            <span>Spool: 
-              <select onchange="updateSpoolCapacity('${t.id}', this.value)" style="padding:1px 3px; font-size:0.7rem; width:auto; display:inline-block;">
-                <option value="100" ${capacity===100?'selected':''}>100 Yd</option>
-                <option value="250" ${capacity===250?'selected':''}>250 Yd</option>
-                <option value="500" ${capacity===500?'selected':''}>500 Yd</option>
-                <option value="1000" ${capacity===1000?'selected':''}>1000 Yd</option>
-              </select>
-            </span>
-            <span style="color:${remainingYards < 15 ? '#e63946' : 'var(--accent-cyan)'}; font-weight:bold;">${remainingYards.toFixed(1)} Yds Left</span>
-          </div>
-
-          <div style="font-size:0.7rem; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
-            <span>Manual Deduct (Yds):</span>
-            <input type="number" value="${manualDeduct}" step="1" min="0" max="${capacity}" style="width:60px; padding:1px 4px; font-size:0.7rem;" onchange="updateManualDeduction('${t.id}', this.value)" title="Deduct yardage used outside of wrap pattern" />
-          </div>
-
-          <div class="thread-meter-bar">
-            <div class="thread-meter-fill" style="width: ${percentLeft}%; background: ${remainingYards < 15 ? '#e63946' : 'var(--accent-cyan)'};"></div>
-          </div>
-        ` : ''}
-      </div>
-    `;
-  }).join('');
-}
-
-function addCustomSpool() {
-  const brand = document.getElementById('customBrand')?.value.trim() || "Custom / Shop Spools";
-  const code = document.getElementById('customCode')?.value.trim();
-  const name = document.getElementById('customName')?.value.trim();
-  const hex = document.getElementById('customColor')?.value || '#00509d';
-
-  if (!code || !name) {
-    alert("Please enter both a color code and name.");
-    return;
-  }
-  const id = "cust_" + Date.now();
-  const newSpool = { id, brand, code, name, hex };
-  customShopSpools.push(newSpool);
-  spoolCapacities[id] = 100;
-  manualDeductions[id] = 0;
-  localStorage.setItem(STORAGE_PREFIX + "custom", JSON.stringify(customShopSpools));
-  localStorage.setItem(STORAGE_PREFIX + "caps", JSON.stringify(spoolCapacities));
-  localStorage.setItem(STORAGE_PREFIX + "deds", JSON.stringify(manualDeductions));
-  masterThreadCatalog = [...DEFAULT_CATALOG, ...customShopSpools];
-
-  if (!ownedThreads.includes(id)) ownedThreads.push(id);
-  localStorage.setItem(STORAGE_PREFIX + "owned", JSON.stringify(ownedThreads));
-
-  document.getElementById('customCode').value = '';
-  document.getElementById('customName').value = '';
-  renderThreadLibrary();
-  renderLayersUI();
-  populateGuideColorDropdowns();
-  syncAllEngines();
-  alert(`Added "${name}"!`);
-}
-
-// UNIVERSAL VISUALWRAP PARSER
-function parseAndSaveVisualWrapScript() {
-  const rawText = document.getElementById('importScriptText')?.value || '';
-  let nameInput = document.getElementById('importPatternName')?.value.trim() || ("Imported Pattern " + (savedPatternLibrary.length + 1));
-  
-  if (!rawText.trim()) {
-    alert("Please paste VisualWRAP script code or choose a .vwp file first.");
-    return;
-  }
-
-  const lines = rawText.split(/\r?\n/);
-  const parsedLayers = [];
-  let detectedAxis = null;
-  const defaultSpools = masterThreadCatalog.filter(t => ownedThreads.includes(t.id));
-
-  lines.forEach(line => {
-    let clean = line.trim();
-    if (!clean) return;
-
-    const titleMatch = clean.match(/^TITLE\s*=\s*(.+)/i) || clean.match(/^PATTERN\s*=\s*(.+)/i);
-    if (titleMatch) {
-      nameInput = titleMatch[1].trim();
-      if (document.getElementById('importPatternName')) {
-        document.getElementById('importPatternName').value = nameInput;
-      }
-    }
-
-    const axisMatch = clean.match(/AXIS\s*[:=]\s*(\d+)/i) || clean.match(/LAYOUT\s*[:=]\s*(\d+)/i) || clean.match(/GRID\s*[:=]\s*(\d+)/i);
-    if (axisMatch) detectedAxis = parseInt(axisMatch[1]);
-  });
-
-  if (!detectedAxis) {
-    const fullUpper = (rawText + " " + nameInput).toUpperCase();
-    if (fullUpper.includes("8-POINT") || fullUpper.includes("8-AXIS") || fullUpper.includes("SPIDER") || fullUpper.includes("OCTAGONAL")) detectedAxis = 8;
-    else if (fullUpper.includes("6-POINT") || fullUpper.includes("6-AXIS") || fullUpper.includes("HEX")) detectedAxis = 6;
-    else if (fullUpper.includes("2-AXIS") || fullUpper.includes("CHEVRON SINGLE")) detectedAxis = 2;
-    else detectedAxis = 4;
-  }
-
-  lines.forEach(line => {
-    let clean = line.trim();
-    if (!clean) return;
-
-    clean = clean.split(';')[0].split('//')[0].split('#')[0].trim();
-    if (!clean) return;
-
-    if (clean.includes('=')) {
-      const parts = clean.split('=');
-      const key = parts[0].trim().toUpperCase();
-      const val = parts.slice(1).join('=').trim();
-      if (/^(T\d+|PASS\d+|LAYER\d+|BAND\d+|LINE\d+|P\d+)$/i.test(key) || val.includes(',')) clean = val;
-      else return;
-    }
-
-    if (clean.startsWith('[') && clean.endsWith(']')) return;
-    if (!clean.includes(',') && clean.includes(' ')) clean = clean.replace(/\s+/g, ',');
-
-    const tokens = clean.split(',').map(t => t.trim().toUpperCase()).filter(t => t.length > 0);
-    if (tokens.length === 0) return;
-
-    let geo = "CROSS";
-    let direction = "OUT";
-    let passes = 4;
-    let spoolIndex = parsedLayers.length % (defaultSpools.length || 1);
-    let isValid = false;
-
-    const firstTok = tokens[0];
-
-    if (["CROSS", "BOX", "CHEVRON", "OFFSET", "DIAMOND", "STAR", "WRAP", "IN", "OUT"].includes(firstTok)) {
-      isValid = true;
-      if (firstTok === "BOX") geo = "BOX";
-      else if (firstTok === "CHEVRON") geo = "CHEVRON";
-      else if (firstTok === "OFFSET") geo = "OFFSET";
-
-      tokens.forEach((tok, tIdx) => {
-        if (tok === "IN" || tok === "OUT" || tok === "BOX") direction = tok;
-        if (tok.startsWith("COLOR_") || tok.startsWith("COL_") || tok.startsWith("C_") || tok.startsWith("C")) {
-          const cNum = parseInt(tok.replace(/\D/g, ''));
-          if (!isNaN(cNum) && cNum > 0) spoolIndex = (cNum - 1) % (defaultSpools.length || 1);
-        }
-        if (tIdx > 0 && !isNaN(parseInt(tok)) && parseInt(tok) > 0 && parseInt(tok) <= 200) passes = parseInt(tok);
-      });
-    } else {
-      const numbers = tokens.map(t => parseInt(t.replace(/\D/g, ''))).filter(n => !isNaN(n));
-      if (numbers.length >= 2) {
-        isValid = true;
-        if (numbers.length >= 3 && [1, 2, 3, 4].includes(numbers[2])) {
-          if (numbers[2] === 2) geo = "BOX";
-          else if (numbers[2] === 3) geo = "CHEVRON";
-          else if (numbers[2] === 4) geo = "OFFSET";
-        } else if (numbers.length >= 4 && [1, 2, 3, 4].includes(numbers[3])) {
-          if (numbers[3] === 2) geo = "BOX";
-          else if (numbers[3] === 3) geo = "CHEVRON";
-          else if (numbers[3] === 4) geo = "OFFSET";
-        }
-
-        if (numbers.length >= 4 && [1, 2, 3].includes(numbers[3])) {
-          if (numbers[3] === 2) direction = "IN";
-          else if (numbers[3] === 3) direction = "BOX";
-        }
-
-        if (numbers.length >= 2 && numbers[1] > 0 && numbers[1] <= 100) passes = numbers[1];
-        else if (numbers.length >= 6 && numbers[5] > 0 && numbers[5] <= 100) passes = numbers[5];
-        else passes = numbers[numbers.length - 1] || 4;
-
-        if (numbers.length >= 5 && numbers[4] > 0) spoolIndex = (numbers[4] - 1) % (defaultSpools.length || 1);
-      }
-    }
-
-    if (isValid) {
-      const selectedSpool = defaultSpools[spoolIndex] || masterThreadCatalog[0];
-      parsedLayers.push({
-        threadId: selectedSpool.id,
-        geo: geo,
-        offset: parsedLayers.length * 12,
-        passes: passes,
-        type: direction
-      });
-    }
-  });
-
-  if (parsedLayers.length === 0) {
-    alert("Could not extract wrapping passes from this file.");
-    return;
-  }
-
-  const finalName = document.getElementById('importPatternName')?.value.trim() || nameInput;
-  const newPattern = { name: finalName, axis: detectedAxis, layers: parsedLayers };
-
-  savedPatternLibrary.unshift(newPattern);
-  try {
-    localStorage.setItem(STORAGE_PREFIX + "pats", JSON.stringify(savedPatternLibrary));
-  } catch (e) {}
-
-  currentPatternTitle = newPattern.name;
-  layers = JSON.parse(JSON.stringify(newPattern.layers));
-  
-  const axEl = document.getElementById('patternAxis');
-  if (axEl) axEl.value = newPattern.axis;
-
-  renderPatternLibraryList();
-  renderLayersUI();
-  populateGuideColorDropdowns();
-  syncAllEngines();
-
-  const stepRadio = document.getElementById('t-step');
-  if (stepRadio) stepRadio.checked = true;
-
-  alert(`Auto-detected ${detectedAxis}-Axis! Loaded "${finalName}" with ${parsedLayers.length} thread bands into your workbench!`);
-}
-
-function renderPatternLibraryList() {
-  const list = document.getElementById('patternLibraryList');
-  if (!list) return;
-  const count = document.getElementById('patternCount');
-  if (count) count.textContent = `${savedPatternLibrary.length} Patterns Saved`;
-  list.innerHTML = savedPatternLibrary.map((pat, idx) => `
-    <div class="pattern-card">
-      <div>
-        <h3>${pat.name}</h3>
-        <p>${pat.axis || 4}-Axis • ${pat.layers.length} Thread Bands</p>
-      </div>
-      <div style="display:flex; gap:6px;">
-        <button type="button" class="btn btn-outline btn-sm" onclick="loadPatternFromLibrary(${idx})">Load</button>
-        <button type="button" class="btn btn-danger btn-sm" onclick="deletePatternFromLibrary(${idx})">&times;</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function loadPatternFromLibrary(index) {
-  const target = savedPatternLibrary[index];
-  if (!target) return;
-  currentPatternTitle = target.name;
-  layers = JSON.parse(JSON.stringify(target.layers));
-  const ax = document.getElementById('patternAxis');
-  if (ax) ax.value = target.axis || 4;
-  renderLayersUI();
-  populateGuideColorDropdowns();
-  syncAllEngines();
-}
-
-function deletePatternFromLibrary(index) {
-  if (confirm(`Delete "${savedPatternLibrary[index].name}"?`)) {
-    savedPatternLibrary.splice(index, 1);
-    localStorage.setItem(STORAGE_PREFIX + "pats", JSON.stringify(savedPatternLibrary));
-    renderPatternLibraryList();
-  }
 }
 
 // 3D TOUCH & DRAG
