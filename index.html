@@ -317,7 +317,7 @@
 <header>
   <div>
     <h1>THREAD STUDIO PRO</h1>
-    <p>VisualWRAP Architecture & Multi-Axis Wrapping Engine</p>
+    <p>VisualWRAP Architecture & Master Thread Catalog</p>
   </div>
   <button type="button" class="btn btn-danger btn-sm" onclick="factoryResetApp()" style="width:auto;">🔴 Reset Defaults</button>
 </header>
@@ -344,7 +344,6 @@
   <label for="t-vws" class="tab-label" onclick="syncAllEngines()">9. Export Script</label>
 </div>
 
-<!-- TAB 1: VISUALIZER -->
 <div id="panel-vis" class="tab-panel">
   <div class="grid-layout">
     <div>
@@ -420,7 +419,6 @@
   </div>
 </div>
 
-<!-- TAB 2: ANIMATED WORKBENCH -->
 <div id="panel-step" class="tab-panel">
   <div class="step-banner">
     <div class="step-info">
@@ -474,7 +472,6 @@
   </div>
 </div>
 
-<!-- TAB 3: 3D CYLINDRICAL ROD SIMULATOR -->
 <div id="panel-3d" class="tab-panel">
   <div class="card">
     <h2>
@@ -494,7 +491,6 @@
   </div>
 </div>
 
-<!-- TAB 4: WRAP INSTRUCTION SHEET -->
 <div id="panel-sheet" class="tab-panel">
   <div class="card">
     <h2>
@@ -505,7 +501,6 @@
   </div>
 </div>
 
-<!-- TAB 5: GLOSSARY -->
 <div id="panel-gloss" class="tab-panel">
   <div class="card">
     <h2>📖 Rod Wrap Terminology & Pattern Glossary</h2>
@@ -530,7 +525,6 @@
   </div>
 </div>
 
-<!-- TAB 6: VISUALWRAP IMPORTER -->
 <div id="panel-imp" class="tab-panel">
   <div class="grid-layout">
     <div>
@@ -560,7 +554,6 @@
   </div>
 </div>
 
-<!-- TAB 7: THREAD INVENTORY -->
 <div id="panel-lib" class="tab-panel">
   <div class="card">
     <h2>➕ Add Custom Spool</h2>
@@ -603,14 +596,18 @@
       <div class="form-group">
         <label>Brand Filter</label>
         <select id="brandFilter" onchange="renderThreadLibrary()">
-          <option value="ALL">All Brands & Types</option>
-          <option value="Fuji Ultra Poly">Fuji Ultra Poly (Solids 001-018 & 900s)</option>
-          <option value="Fuji Neon Series">Fuji Neon Series (501-504)</option>
+          <option value="ALL">All Brands (120+ Spools)</option>
+          <option value="Fuji Ultra Poly">Fuji Ultra Poly Solids</option>
           <option value="Fuji Ultra Poly NOCP">Fuji Ultra Poly NOCP</option>
-          <option value="Fuji Ultra Poly Metallic">Fuji Metallic (020-040 & 900s)</option>
-          <option value="ProWrap Metallic">ProWrap - Metallic</option>
-          <option value="ProWrap Color Fast">ProWrap - Color Fast</option>
-          <option value="ProWrap Nylon">ProWrap - Standard Nylon</option>
+          <option value="Fuji Ultra Poly Metallic">Fuji Ultra Poly Metallic</option>
+          <option value="Fuji Neon Series">Fuji Neon Series</option>
+          <option value="ProWrap Metallic">ProWrap Metallic</option>
+          <option value="ProWrap Color Fast">ProWrap Color Fast</option>
+          <option value="ProWrap Nylon">ProWrap Nylon</option>
+          <option value="Fish Hawk Nylon">Fish Hawk (RodDancer) Nylon</option>
+          <option value="Fish Hawk Opaque">Fish Hawk (RodDancer) Opaque</option>
+          <option value="Gudebrod Heritage">Gudebrod Heritage Classics</option>
+          <option value="Madeira Polyneon">Madeira Polyneon</option>
           <option value="Custom / Shop Spools">Custom / Shop Spools</option>
         </select>
       </div>
@@ -623,7 +620,7 @@
       </div>
       <div class="form-group">
         <label>Search Color / Number</label>
-        <input type="text" id="threadSearch" placeholder="Type 035, 914, 908, 901, 024, 503, Gold, Blue..." oninput="renderThreadLibrary()" />
+        <input type="text" id="threadSearch" placeholder="Search 901, 326, 035, Blurple, Teal, Gold..." oninput="renderThreadLibrary()" />
       </div>
     </div>
 
@@ -631,7 +628,6 @@
   </div>
 </div>
 
-<!-- TAB 8: TAPER -->
 <div id="panel-lay" class="tab-panel">
   <div class="grid-layout">
     <div class="card">
@@ -677,7 +673,6 @@
   </div>
 </div>
 
-<!-- TAB 9: VISUALWRAP EXPORT -->
 <div id="panel-vws" class="tab-panel">
   <div class="card">
     <h2>VisualWRAP Formatted Script Export</h2>
@@ -687,9 +682,9 @@
 </div>
 
 <script>
-// FULL 60+ SPOOL AUDITED THREAD CATALOG
+// TRUE MASTER CATALOG (120+ INDUSTRY SPOOLS)
 const DEFAULT_CATALOG = [
-  // Fuji Metallic
+  // 1. FUJI METALLIC
   { id: "fj_m901", brand: "Fuji Ultra Poly Metallic", code: "901 / 022 / M-02", name: "Gold Metallic", hex: "#CCA43B" },
   { id: "fj_m902", brand: "Fuji Ultra Poly Metallic", code: "902 / 020 / M-01", name: "Silver Metallic", hex: "#D3D3D3" },
   { id: "fj_m903", brand: "Fuji Ultra Poly Metallic", code: "903 / 023 / M-03", name: "Copper Metallic", hex: "#B87333" },
@@ -707,12 +702,14 @@ const DEFAULT_CATALOG = [
   { id: "fj_m032", brand: "Fuji Ultra Poly Metallic", code: "032 / M-12", name: "Pink Metallic", hex: "#FF4D6D" },
   { id: "fj_m035", brand: "Fuji Ultra Poly Metallic", code: "035", name: "Teal Metallic", hex: "#00A896" },
   { id: "fj_m040", brand: "Fuji Ultra Poly Metallic", code: "040 / 910 / M-20", name: "Pale Gold Metallic", hex: "#E5C358" },
-  // Fuji Neon
+
+  // 2. FUJI NEON
   { id: "fj_503", brand: "Fuji Neon Series", code: "503", name: "Neon Green", hex: "#39FF14" },
   { id: "fj_504", brand: "Fuji Neon Series", code: "504", name: "Neon Lime", hex: "#CCFF00" },
   { id: "fj_501", brand: "Fuji Neon Series", code: "501", name: "Neon Orange", hex: "#FF5E00" },
   { id: "fj_502", brand: "Fuji Neon Series", code: "502", name: "Neon Pink", hex: "#FF1493" },
-  // Fuji Ultra Poly Solids
+
+  // 3. FUJI ULTRA POLY SOLIDS (001 - 024+)
   { id: "fj_001", brand: "Fuji Ultra Poly", code: "001 / 01", name: "White", hex: "#FFFFFF" },
   { id: "fj_002", brand: "Fuji Ultra Poly", code: "002 / 02", name: "Black", hex: "#0A0A0A" },
   { id: "fj_003", brand: "Fuji Ultra Poly", code: "003 / 03", name: "Smoke Grey", hex: "#7D8597" },
@@ -731,7 +728,12 @@ const DEFAULT_CATALOG = [
   { id: "fj_016", brand: "Fuji Ultra Poly", code: "016 / 16", name: "Lemon Yellow", hex: "#FFD000" },
   { id: "fj_017", brand: "Fuji Ultra Poly", code: "017 / 17", name: "Sunburst Medium Gold", hex: "#E0A922" },
   { id: "fj_018", brand: "Fuji Ultra Poly", code: "018 / 18", name: "Bright Gold", hex: "#FFD700" },
-  // Fuji NOCP
+  { id: "fj_019", brand: "Fuji Ultra Poly", code: "019", name: "Light Grey", hex: "#B0B5BA" },
+  { id: "fj_020", brand: "Fuji Ultra Poly", code: "020", name: "Candy Apple Red", hex: "#C70039" },
+  { id: "fj_021", brand: "Fuji Ultra Poly", code: "021", name: "Light Blue", hex: "#5DADE2" },
+  { id: "fj_022", brand: "Fuji Ultra Poly", code: "022", name: "Hot Pink", hex: "#FF1493" },
+
+  // 4. FUJI NOCP SERIES (001 - 045)
   { id: "fj_nop001", brand: "Fuji Ultra Poly NOCP", code: "NOP-001", name: "NOCP White", hex: "#FFFFFF" },
   { id: "fj_nop002", brand: "Fuji Ultra Poly NOCP", code: "NOP-002", name: "NOCP Black", hex: "#0D0D0D" },
   { id: "fj_nop004", brand: "Fuji Ultra Poly NOCP", code: "NOP-004", name: "NOCP Cobalt Blue", hex: "#0052A5" },
@@ -740,7 +742,43 @@ const DEFAULT_CATALOG = [
   { id: "fj_nop009", brand: "Fuji Ultra Poly NOCP", code: "NOP-009", name: "NOCP Teal", hex: "#00A896" },
   { id: "fj_nop014", brand: "Fuji Ultra Poly NOCP", code: "NOP-014 / 914", name: "NOCP Purple", hex: "#7B2CBF" },
   { id: "fj_nop018", brand: "Fuji Ultra Poly NOCP", code: "NOP-018", name: "NOCP Bright Gold", hex: "#FFC300" },
-  // ProWrap Metallic
+  { id: "fj_nop024", brand: "Fuji Ultra Poly NOCP", code: "NOP-024", name: "Maui Wowie", hex: "#2EC4B6" },
+  { id: "fj_nop025", brand: "Fuji Ultra Poly NOCP", code: "NOP-025", name: "Bracket Blue", hex: "#1D3557" },
+  { id: "fj_nop026", brand: "Fuji Ultra Poly NOCP", code: "NOP-026", name: "Moss Brown", hex: "#6F4E37" },
+  { id: "fj_nop027", brand: "Fuji Ultra Poly NOCP", code: "NOP-027", name: "Moss Green", hex: "#405D27" },
+  { id: "fj_nop028", brand: "Fuji Ultra Poly NOCP", code: "NOP-028", name: "Olive Green", hex: "#556B2F" },
+  { id: "fj_nop029", brand: "Fuji Ultra Poly NOCP", code: "NOP-029", name: "Desert Tan", hex: "#D2B48C" },
+  { id: "fj_nop030", brand: "Fuji Ultra Poly NOCP", code: "NOP-030", name: "Secret Squirrel", hex: "#4A4036" },
+  { id: "fj_nop031", brand: "Fuji Ultra Poly NOCP", code: "NOP-031", name: "Midnight", hex: "#191970" },
+  { id: "fj_nop032", brand: "Fuji Ultra Poly NOCP", code: "NOP-032", name: "Tactical Tan", hex: "#C2B280" },
+  { id: "fj_nop033", brand: "Fuji Ultra Poly NOCP", code: "NOP-033", name: "Flat Dark Earth", hex: "#7D6B56" },
+  { id: "fj_nop034", brand: "Fuji Ultra Poly NOCP", code: "NOP-034", name: "OG Green", hex: "#355E3B" },
+  { id: "fj_nop035", brand: "Fuji Ultra Poly NOCP", code: "NOP-035", name: "Aquamarine", hex: "#7FFFD4" },
+  { id: "fj_nop036", brand: "Fuji Ultra Poly NOCP", code: "NOP-036", name: "Concrete", hex: "#8A8D8F" },
+  { id: "fj_nop037", brand: "Fuji Ultra Poly NOCP", code: "NOP-037", name: "Rain Cloud", hex: "#5C6B73" },
+  { id: "fj_nop038", brand: "Fuji Ultra Poly NOCP", code: "NOP-038", name: "Purple Haze", hex: "#5E4B8B" },
+  { id: "fj_nop039", brand: "Fuji Ultra Poly NOCP", code: "NOP-039", name: "Cobalt Blue", hex: "#0047AB" },
+  { id: "fj_nop040", brand: "Fuji Ultra Poly NOCP", code: "NOP-040", name: "Bubblegum Pink", hex: "#FF69B4" },
+  { id: "fj_nop041", brand: "Fuji Ultra Poly NOCP", code: "NOP-041", name: "Blurple", hex: "#4B0082" },
+  { id: "fj_nop042", brand: "Fuji Ultra Poly NOCP", code: "NOP-042", name: "Taxi Cab Yellow", hex: "#FDB813" },
+  { id: "fj_nop043", brand: "Fuji Ultra Poly NOCP", code: "NOP-043", name: "Cheddar", hex: "#FFA600" },
+  { id: "fj_nop044", brand: "Fuji Ultra Poly NOCP", code: "NOP-044", name: "Spring Green", hex: "#00FF7F" },
+  { id: "fj_nop045", brand: "Fuji Ultra Poly NOCP", code: "NOP-045", name: "Cork", hex: "#BA8C63" },
+
+  // 5. PROWRAP METALLIC
+  { id: "pw_9100", brand: "ProWrap Metallic", code: "9100", name: "Yellow Gold", hex: "#E8C838" },
+  { id: "pw_9110", brand: "ProWrap Metallic", code: "9110", name: "Gold Leaf", hex: "#D4AF37" },
+  { id: "pw_9120", brand: "ProWrap Metallic", code: "9120", name: "Goldenrod", hex: "#DAA520" },
+  { id: "pw_9130", brand: "ProWrap Metallic", code: "9130", name: "Standard Gold", hex: "#CCA43B" },
+  { id: "pw_9140", brand: "ProWrap Metallic", code: "9140", name: "Goldust", hex: "#E5C158" },
+  { id: "pw_9150", brand: "ProWrap Metallic", code: "9150", name: "Bright Copper", hex: "#C86D3B" },
+  { id: "pw_9160", brand: "ProWrap Metallic", code: "9160", name: "Pale Gold", hex: "#F0E2A8" },
+  { id: "pw_9170", brand: "ProWrap Metallic", code: "9170", name: "Calcutta Gold", hex: "#C59B27" },
+  { id: "pw_9460", brand: "ProWrap Metallic", code: "9460", name: "Deep Blue", hex: "#0A2472" },
+  { id: "pw_9510", brand: "ProWrap Metallic", code: "9510", name: "Lime", hex: "#70E000" },
+  { id: "pw_9520", brand: "ProWrap Metallic", code: "9520", name: "Green", hex: "#2E7D32" },
+  { id: "pw_9530", brand: "ProWrap Metallic", code: "9530", name: "Forest Green", hex: "#1B4D3E" },
+  { id: "pw_9540", brand: "ProWrap Metallic", code: "9540", name: "Shamrock", hex: "#009E60" },
   { id: "pw_9600", brand: "ProWrap Metallic", code: "9600", name: "Purple Metallic", hex: "#782299" },
   { id: "pw_9610", brand: "ProWrap Metallic", code: "9610", name: "Pale Gold Metallic", hex: "#E5C358" },
   { id: "pw_9620", brand: "ProWrap Metallic", code: "9620", name: "Gold Metallic", hex: "#D4AF37" },
@@ -752,18 +790,66 @@ const DEFAULT_CATALOG = [
   { id: "pw_9680", brand: "ProWrap Metallic", code: "9680", name: "Aqua / Teal Metallic", hex: "#00A896" },
   { id: "pw_9690", brand: "ProWrap Metallic", code: "9690", name: "Ice Blue Metallic", hex: "#48CAE4" },
   { id: "pw_9700", brand: "ProWrap Metallic", code: "9700", name: "Lime Metallic", hex: "#70E000" },
+  { id: "pw_9730", brand: "ProWrap Metallic", code: "9730", name: "Brass", hex: "#B5A642" },
+  { id: "pw_9740", brand: "ProWrap Metallic", code: "9740", name: "Brown", hex: "#5C4033" },
+  { id: "pw_9750", brand: "ProWrap Metallic", code: "9750", name: "Bronze", hex: "#8C7853" },
   { id: "pw_9800", brand: "ProWrap Metallic", code: "9800", name: "Gunmetal Metallic", hex: "#2B2B2B" },
-  // ProWrap Color Fast & Nylon
-  { id: "pw_440", brand: "ProWrap Color Fast", code: "440", name: "Turquoise", hex: "#00D2FF" },
-  { id: "pw_862", brand: "ProWrap Color Fast", code: "862", name: "Midnight Black", hex: "#111111" },
-  { id: "pw_807", brand: "ProWrap Color Fast", code: "807", name: "Pure White", hex: "#F8F9FA" },
-  { id: "pw_525", brand: "ProWrap Color Fast", code: "525", name: "Cobalt Blue", hex: "#003566" },
+  { id: "pw_9840", brand: "ProWrap Metallic", code: "9840", name: "Silverback", hex: "#7A7A7A" },
+
+  // 6. PROWRAP COLOR FAST & NYLON
+  { id: "pw_319", brand: "ProWrap Color Fast", code: "319", name: "Redfish", hex: "#C8102E" },
   { id: "pw_322", brand: "ProWrap Color Fast", code: "322", name: "Scarlet Red", hex: "#D90429" },
-  { id: "pw_207", brand: "ProWrap Color Fast", code: "207", name: "Sunburst Gold", hex: "#F4A261" },
+  { id: "pw_440", brand: "ProWrap Color Fast", code: "440", name: "Turquoise", hex: "#00D2FF" },
+  { id: "pw_446", brand: "ProWrap Color Fast", code: "446", name: "Royal Blue", hex: "#0038A8" },
+  { id: "pw_525", brand: "ProWrap Color Fast", code: "525", name: "Cobalt Blue", hex: "#003566" },
   { id: "pw_611", brand: "ProWrap Color Fast", code: "611", name: "Deep Purple", hex: "#4A0E4E" },
+  { id: "pw_807", brand: "ProWrap Color Fast", code: "807", name: "Pure White", hex: "#F8F9FA" },
+  { id: "pw_862", brand: "ProWrap Color Fast", code: "862", name: "Midnight Black", hex: "#111111" },
+  { id: "pw_207", brand: "ProWrap Color Fast", code: "207", name: "Sunburst Gold", hex: "#F4A261" },
   { id: "pw_n01", brand: "ProWrap Nylon", code: "NY-01", name: "Nylon Jet Black", hex: "#050505" },
   { id: "pw_n02", brand: "ProWrap Nylon", code: "NY-02", name: "Nylon Bright White", hex: "#FAFAFA" },
-  { id: "pw_n07", brand: "ProWrap Nylon", code: "NY-07", name: "Nylon Royal Blue", hex: "#0D47A1" }
+  { id: "pw_n07", brand: "ProWrap Nylon", code: "NY-07", name: "Nylon Royal Blue", hex: "#0D47A1" },
+
+  // 7. FISH HAWK (RODDANCER) NYLON & OPAQUE
+  { id: "fh_206", brand: "Fish Hawk Nylon", code: "FH-206", name: "Garnet", hex: "#7B1113" },
+  { id: "fh_209", brand: "Fish Hawk Nylon", code: "FH-209", name: "Goldenrod", hex: "#DAA520" },
+  { id: "fh_221", brand: "Fish Hawk Nylon", code: "FH-221", name: "Orange", hex: "#FF5E00" },
+  { id: "fh_245", brand: "Fish Hawk Nylon", code: "FH-245", name: "Royal Blue", hex: "#0056B3" },
+  { id: "fh_246", brand: "Fish Hawk Nylon", code: "FH-246", name: "Dark Blue", hex: "#002366" },
+  { id: "fh_257", brand: "Fish Hawk Nylon", code: "FH-257", name: "Rust", hex: "#8B3103" },
+  { id: "fh_272", brand: "Fish Hawk Nylon", code: "FH-272", name: "Blue Dun", hex: "#6E7F80" },
+  { id: "fh_274", brand: "Fish Hawk Nylon", code: "FH-274", name: "Chestnut", hex: "#5C4033" },
+  { id: "fh_326", brand: "Fish Hawk Nylon", code: "FH-326", name: "Scarlet", hex: "#D90429" },
+  { id: "fh_337", brand: "Fish Hawk Nylon", code: "FH-337", name: "Maroon", hex: "#800000" },
+  { id: "fh_396", brand: "Fish Hawk Nylon", code: "FH-396", name: "Dark Brown", hex: "#3B271A" },
+  { id: "fh_468", brand: "Fish Hawk Nylon", code: "FH-468", name: "Purple", hex: "#6A0DAD" },
+  { id: "fh_778", brand: "Fish Hawk Nylon", code: "FH-778", name: "Lemon Yellow", hex: "#FFF44F" },
+  { id: "fh_779", brand: "Fish Hawk Nylon", code: "FH-779", name: "Medium Green", hex: "#2E8B57" },
+  { id: "fh_896", brand: "Fish Hawk Nylon", code: "FH-896", name: "Dark Green", hex: "#1C3F24" },
+  { id: "fh_op129", brand: "Fish Hawk Opaque", code: "OP-129", name: "Dark Aqua", hex: "#008B8B" },
+  { id: "fh_op638", brand: "Fish Hawk Opaque", code: "OP-638", name: "Teal", hex: "#008080" },
+
+  // 8. GUDEBROD HERITAGE CLASSICS
+  { id: "gb_001", brand: "Gudebrod Heritage", code: "#001", name: "Black", hex: "#000000" },
+  { id: "gb_002", brand: "Gudebrod Heritage", code: "#002", name: "White", hex: "#FFFFFF" },
+  { id: "gb_206", brand: "Gudebrod Heritage", code: "#206", name: "Garnet", hex: "#73000A" },
+  { id: "gb_209", brand: "Gudebrod Heritage", code: "#209", name: "Goldenrod", hex: "#D4AF37" },
+  { id: "gb_221", brand: "Gudebrod Heritage", code: "#221", name: "Orange", hex: "#FF4500" },
+  { id: "gb_245", brand: "Gudebrod Heritage", code: "#245", name: "Royal Blue", hex: "#002FA7" },
+  { id: "gb_272", brand: "Gudebrod Heritage", code: "#272", name: "Blue Dun", hex: "#5C6B73" },
+  { id: "gb_326", brand: "Gudebrod Heritage", code: "#326", name: "Scarlet", hex: "#E60000" },
+  { id: "gb_337", brand: "Gudebrod Heritage", code: "#337", name: "Maroon", hex: "#5E1914" },
+  { id: "gb_396", brand: "Gudebrod Heritage", code: "#396", name: "Dark Brown", hex: "#3D2314" },
+  { id: "gb_468", brand: "Gudebrod Heritage", code: "#468", name: "Purple", hex: "#551A8B" },
+  { id: "gb_779", brand: "Gudebrod Heritage", code: "#779", name: "Medium Green", hex: "#228B22" },
+
+  // 9. MADEIRA POLYNEON
+  { id: "mad_1801", brand: "Madeira Polyneon", code: "1801", name: "Super White", hex: "#FFFFFF" },
+  { id: "mad_1800", brand: "Madeira Polyneon", code: "1800", name: "Emerald Black", hex: "#0A0A0A" },
+  { id: "mad_1842", brand: "Madeira Polyneon", code: "1842", name: "Electric Blue", hex: "#007FFF" },
+  { id: "mad_1734", brand: "Madeira Polyneon", code: "1734", name: "Auburn Red", hex: "#9E1B32" },
+  { id: "mad_1683", brand: "Madeira Polyneon", code: "1683", name: "Sun Yellow", hex: "#FFD300" },
+  { id: "mad_1970", brand: "Madeira Polyneon", code: "1970", name: "Imperial Purple", hex: "#66023C" }
 ];
 
 const DEFAULT_PATTERNS = [
@@ -863,12 +949,11 @@ const DEFAULT_PATTERNS = [
   }
 ];
 
-// STATE MANAGEMENT
-const STORAGE_PREFIX = "tsp_v3_";
+const STORAGE_PREFIX = "tsp_master_v5_";
 let customShopSpools = [];
 let masterThreadCatalog = [...DEFAULT_CATALOG];
 let ownedThreads = [
-  "fj_m901", "fj_014", "pw_440", "fj_002", "fj_503", "fj_504", "fj_m902", "fj_m908", "fj_m024", "fj_m035", "pw_9600", "pw_9620"
+  "fj_m901", "fj_014", "pw_440", "fj_002", "fj_503", "fj_504", "fj_m902", "fj_m908", "fj_m024", "fj_m035", "pw_9600", "pw_9620", "gb_206", "gb_326"
 ];
 let savedPatternLibrary = JSON.parse(JSON.stringify(DEFAULT_PATTERNS));
 let currentPatternTitle = savedPatternLibrary[0].name;
@@ -905,7 +990,7 @@ let lastMouseY = 0;
 let lastMouseX = 0;
 
 function factoryResetApp() {
-  if (confirm("Reset Thread Studio Pro to factory defaults?")) {
+  if (confirm("Reset Thread Studio Pro to complete factory master catalog?")) {
     localStorage.clear();
     location.reload();
   }
@@ -997,11 +1082,11 @@ function renderLayersUI() {
   layers.forEach((layer, idx) => {
     const item = document.createElement('div');
     item.className = 'layer-item';
-    let opt = `<optgroup label="⭐ My Owned Threads">`;
+    let opt = `<optgroup label="⭐ My Owned Spools">`;
     masterThreadCatalog.filter(t => ownedThreads.includes(t.id)).forEach(t => {
       opt += `<option value="${t.id}" ${layer.threadId === t.id ? 'selected' : ''}>${t.brand} ${t.code} (${t.name})</option>`;
     });
-    opt += `</optgroup><optgroup label="Other Catalog Spools">`;
+    opt += `</optgroup><optgroup label="Master Catalog Spools (Fuji, ProWrap, FishHawk, Gudebrod)">`;
     masterThreadCatalog.filter(t => !ownedThreads.includes(t.id)).forEach(t => {
       opt += `<option value="${t.id}" ${layer.threadId === t.id ? 'selected' : ''}>${t.brand} ${t.code} (${t.name})</option>`;
     });
@@ -1252,7 +1337,6 @@ function renderStepCanvas() {
   ctx.fillStyle = blankGrad;
   ctx.fill();
 
-  // ONLY 0, 90, 180 AXIS
   [
     { ratio: 0.0, label: "0° (Top)" },
     { ratio: 0.5, label: "90° (Mid)" },
@@ -1490,7 +1574,7 @@ function stepAll() {
   renderStepCanvas();
 }
 
-// 3D SOLID SIMULATOR (STATIONARY BY DEFAULT)
+// 3D FULL REAL-WORLD CYLINDRICAL THREAD WRAP SIMULATOR
 function draw3DRod() {
   const canvas = document.getElementById('rodCanvas3D');
   if (!canvas) return;
@@ -1512,20 +1596,22 @@ function draw3DRod() {
   const rodX = 60;
 
   const blankGrad = ctx.createLinearGradient(0, rodTop, 0, rodBottom);
-  blankGrad.addColorStop(0, adjustBrightness(activeBlankColor, -40));
-  blankGrad.addColorStop(0.18, adjustBrightness(activeBlankColor, 40));
+  blankGrad.addColorStop(0, adjustBrightness(activeBlankColor, -45));
+  blankGrad.addColorStop(0.18, adjustBrightness(activeBlankColor, 35));
   blankGrad.addColorStop(0.5, adjustBrightness(activeBlankColor, -50));
   blankGrad.addColorStop(0.82, adjustBrightness(activeBlankColor, 20));
   blankGrad.addColorStop(1, adjustBrightness(activeBlankColor, -70));
   ctx.fillStyle = blankGrad;
   ctx.fillRect(rodX, rodTop, rodLength, rodThickness);
 
-  ctx.strokeStyle = "rgba(255,255,255,0.22)";
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(rodX, rodTop + 8);
-  ctx.lineTo(rodX + rodLength, rodTop + 8);
-  ctx.stroke();
+  ctx.strokeStyle = "rgba(255,255,255,0.06)";
+  ctx.lineWidth = 1;
+  for (let g = rodTop + 4; g < rodBottom; g += 5) {
+    ctx.beginPath();
+    ctx.moveTo(rodX, g);
+    ctx.lineTo(rodX + rodLength, g);
+    ctx.stroke();
+  }
 
   ctx.save();
   ctx.beginPath();
@@ -1534,56 +1620,106 @@ function draw3DRod() {
 
   const cellW = rodLength / repeats;
 
-  function project3DCylinder(angleRad) {
-    const theta = ((angleRad + rodAxialAngle) % (Math.PI * 2) + (Math.PI * 2)) % (Math.PI * 2);
-    return {
-      y: centerY - (radius * Math.cos(theta)),
-      visible: (theta >= 0 && theta <= Math.PI),
-      z: Math.sin(theta)
-    };
+  function getCylinderCoords(xWorld, angleRad) {
+    const normAngle = ((angleRad + rodAxialAngle) % (Math.PI * 2) + (Math.PI * 2)) % (Math.PI * 2);
+    const isVisible = (normAngle >= 0 && normAngle <= Math.PI);
+    const yProj = centerY - (radius * Math.cos(normAngle));
+    const zDepth = Math.sin(normAngle);
+    return { x: xWorld, y: yProj, visible: isVisible, z: zDepth };
+  }
+
+  function drawCylinderRibbon(p1, p2, threadHex) {
+    const numSubdivisions = 36;
+    ctx.strokeStyle = threadHex;
+    ctx.lineCap = "butt";
+
+    for (let i = 0; i < numSubdivisions; i++) {
+      const t1 = i / numSubdivisions;
+      const t2 = (i + 1) / numSubdivisions;
+      
+      const xA = p1.x + (p2.x - p1.x) * t1;
+      const angA = p1.angle + (p2.angle - p1.angle) * t1;
+      const ptA = getCylinderCoords(xA, angA);
+
+      const xB = p1.x + (p2.x - p1.x) * t2;
+      const angB = p1.angle + (p2.angle - p1.angle) * t2;
+      const ptB = getCylinderCoords(xB, angB);
+
+      if (ptA.visible && ptB.visible) {
+        const avgZ = (ptA.z + ptB.z) / 2;
+        ctx.lineWidth = 2.0;
+        ctx.globalAlpha = Math.max(0.35, Math.min(1.0, avgZ * 1.1));
+        
+        ctx.beginPath();
+        ctx.moveTo(ptA.x, ptA.y);
+        ctx.lineTo(ptB.x, ptB.y);
+        ctx.stroke();
+
+        if (avgZ > 0.65) {
+          ctx.strokeStyle = "rgba(255,255,255,0.18)";
+          ctx.lineWidth = 0.8;
+          ctx.beginPath();
+          ctx.moveTo(ptA.x, ptA.y);
+          ctx.lineTo(ptB.x, ptB.y);
+          ctx.stroke();
+          ctx.strokeStyle = threadHex;
+        }
+      }
+    }
   }
 
   layers.forEach((layer, lIdx) => {
     const thread = getThreadInfo(layer.threadId);
-    const layerOffset = (layer.offset || (lIdx * 12)) * (axis / 4);
-    let halfBox = (cellW * 0.22) + layerOffset;
-    if (layer.type === "IN") halfBox = Math.max(8, (cellW * 0.40) - layerOffset);
+    const baseOffset = (layer.offset || (lIdx * 12)) * (axis / 4);
 
-    for (let r = 0; r < repeats; r++) {
-      const cx = rodX + (r * cellW) + (cellW / 2);
+    for (let p = 1; p <= layer.passes; p++) {
+      let passOffset = baseOffset;
+      if (layer.type === "IN") {
+        passOffset = Math.max(4, (cellW * 0.38) - (p * 1.8));
+      } else {
+        passOffset += (p * 1.6);
+      }
+      const halfBox = ((cellW * 0.22) + passOffset) * (axis / 4);
 
-      for (let a = 0; a < axis; a++) {
-        const axisAngle = (a / axis) * (Math.PI * 2);
-        const pTop = project3DCylinder(axisAngle - (Math.PI / 2));
-        const pBot = project3DCylinder(axisAngle + (Math.PI / 2));
-        const pMid = project3DCylinder(axisAngle);
+      for (let r = 0; r < repeats; r++) {
+        const cx = rodX + (r * cellW) + (cellW / 2);
 
-        if (pTop.visible && pBot.visible && (pTop.z + pBot.z) / 2 > 0.05) {
-          ctx.strokeStyle = thread.hex;
-          ctx.lineWidth = Math.max(1.8, layer.passes * 0.9);
-          ctx.globalAlpha = Math.max(0.7, (pTop.z + pBot.z) / 2);
+        for (let a = 0; a < axis; a++) {
+          const axisAngle = (a / axis) * (Math.PI * 2);
 
-          ctx.beginPath();
           if (layer.geo === "CROSS") {
-            ctx.moveTo(cx - halfBox, pTop.y);
-            ctx.lineTo(cx + halfBox, pBot.y);
+            const p1 = { x: cx - halfBox, angle: axisAngle - (Math.PI / 2) };
+            const p2 = { x: cx + halfBox, angle: axisAngle + (Math.PI / 2) };
+            drawCylinderRibbon(p1, p2, thread.hex);
+
+            if (axis >= 4) {
+              const p3 = { x: cx - halfBox, angle: axisAngle + (Math.PI / 2) };
+              const p4 = { x: cx + halfBox, angle: axisAngle - (Math.PI / 2) };
+              drawCylinderRibbon(p3, p4, thread.hex);
+            }
           } else if (layer.geo === "BOX" || layer.type === "BOX") {
-            ctx.moveTo(cx, pTop.y);
-            ctx.lineTo(cx + halfBox, pMid.y);
-            ctx.lineTo(cx, pBot.y);
-            ctx.lineTo(cx - halfBox, pMid.y);
-            ctx.closePath();
+            const ptTop = { x: cx, angle: axisAngle - (Math.PI / 2) };
+            const ptRight = { x: cx + halfBox, angle: axisAngle };
+            const ptBot = { x: cx, angle: axisAngle + (Math.PI / 2) };
+            const ptLeft = { x: cx - halfBox, angle: axisAngle };
+
+            drawCylinderRibbon(ptLeft, ptTop, thread.hex);
+            drawCylinderRibbon(ptTop, ptRight, thread.hex);
+            drawCylinderRibbon(ptRight, ptBot, thread.hex);
+            drawCylinderRibbon(ptBot, ptLeft, thread.hex);
           } else if (layer.geo === "CHEVRON") {
-            ctx.moveTo(cx - halfBox, pTop.y);
-            ctx.lineTo(cx, pBot.y);
-            ctx.lineTo(cx + halfBox, pTop.y);
+            const ptL = { x: cx - halfBox, angle: axisAngle - (Math.PI / 2) };
+            const ptM = { x: cx, angle: axisAngle + (Math.PI / 2) };
+            const ptR = { x: cx + halfBox, angle: axisAngle - (Math.PI / 2) };
+            drawCylinderRibbon(ptL, ptM, thread.hex);
+            drawCylinderRibbon(ptM, ptR, thread.hex);
           } else {
-            ctx.moveTo(cx - halfBox, pMid.y);
-            ctx.lineTo(cx, pBot.y);
-            ctx.moveTo(cx, pTop.y);
-            ctx.lineTo(cx + halfBox, pMid.y);
+            const p1 = { x: cx - halfBox, angle: axisAngle };
+            const p2 = { x: cx, angle: axisAngle + (Math.PI / 2) };
+            const p3 = { x: cx + halfBox, angle: axisAngle };
+            drawCylinderRibbon(p1, p2, thread.hex);
+            drawCylinderRibbon(p2, p3, thread.hex);
           }
-          ctx.stroke();
         }
       }
     }
@@ -1591,23 +1727,39 @@ function draw3DRod() {
 
   ctx.globalAlpha = 1.0;
 
-  const glossGrad = ctx.createLinearGradient(0, rodTop, 0, rodBottom);
-  glossGrad.addColorStop(0, "rgba(255,255,255,0.18)");
-  glossGrad.addColorStop(0.25, "rgba(255,255,255,0)");
-  glossGrad.addColorStop(0.75, "rgba(0,0,0,0.35)");
-  glossGrad.addColorStop(1, "rgba(0,0,0,0.65)");
-  ctx.fillStyle = glossGrad;
+  const epoxyGloss = ctx.createLinearGradient(0, rodTop, 0, rodBottom);
+  epoxyGloss.addColorStop(0, "rgba(255, 255, 255, 0.28)");
+  epoxyGloss.addColorStop(0.12, "rgba(255, 255, 255, 0.55)");
+  epoxyGloss.addColorStop(0.22, "rgba(255, 255, 255, 0.12)");
+  epoxyGloss.addColorStop(0.55, "rgba(0, 0, 0, 0.0)");
+  epoxyGloss.addColorStop(0.85, "rgba(0, 0, 0, 0.35)");
+  epoxyGloss.addColorStop(1.0, "rgba(0, 0, 0, 0.70)");
+  ctx.fillStyle = epoxyGloss;
   ctx.fillRect(rodX, rodTop, rodLength, rodThickness);
+
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.45)";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(rodX, rodTop + (rodThickness * 0.14));
+  ctx.lineTo(rodX + rodLength, rodTop + (rodThickness * 0.14));
+  ctx.stroke();
+
   ctx.restore();
 
-  ctx.fillStyle = "#222";
-  ctx.fillRect(rodX - 5, rodTop, 5, rodThickness);
-  ctx.fillRect(rodX + rodLength, rodTop, 5, rodThickness);
+  const checkGrad = ctx.createLinearGradient(0, rodTop, 0, rodBottom);
+  checkGrad.addColorStop(0, "#888");
+  checkGrad.addColorStop(0.3, "#fff");
+  checkGrad.addColorStop(0.7, "#444");
+  checkGrad.addColorStop(1, "#111");
+  ctx.fillStyle = checkGrad;
+  ctx.fillRect(rodX - 6, rodTop - 1, 6, rodThickness + 2);
+  ctx.fillRect(rodX + rodLength, rodTop - 1, 6, rodThickness + 2);
 
-  const degrees = Math.round(((rodAxialAngle % (Math.PI * 2)) / (Math.PI * 2)) * 360);
-  ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
-  ctx.font = "10px sans-serif";
-  ctx.fillText(`ROTATION: ${degrees < 0 ? degrees + 360 : degrees}° / 360°`, rodX + (rodLength / 2) - 60, rodBottom + 18);
+  const deg = Math.round(((rodAxialAngle % (Math.PI * 2)) / (Math.PI * 2)) * 360);
+  const positiveDeg = deg < 0 ? deg + 360 : deg;
+  ctx.fillStyle = "rgba(255, 255, 255, 0.55)";
+  ctx.font = "11px monospace";
+  ctx.fillText(`ROTATION: ${positiveDeg}° / 360° (SOLID OPAQUE FINISH)`, rodX + (rodLength / 2) - 105, rodBottom + 20);
 }
 
 function reset3DAngle() {
