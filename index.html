@@ -344,6 +344,7 @@
   <label for="t-vws" class="tab-label" onclick="syncAllEngines()">9. Export Script</label>
 </div>
 
+<!-- TAB 1: VISUALIZER -->
 <div id="panel-vis" class="tab-panel">
   <div class="grid-layout">
     <div>
@@ -419,6 +420,7 @@
   </div>
 </div>
 
+<!-- TAB 2: ANIMATED WORKBENCH -->
 <div id="panel-step" class="tab-panel">
   <div class="step-banner">
     <div class="step-info">
@@ -472,6 +474,7 @@
   </div>
 </div>
 
+<!-- TAB 3: 3D CYLINDRICAL ROD SIMULATOR -->
 <div id="panel-3d" class="tab-panel">
   <div class="card">
     <h2>
@@ -491,6 +494,7 @@
   </div>
 </div>
 
+<!-- TAB 4: WRAP INSTRUCTION SHEET -->
 <div id="panel-sheet" class="tab-panel">
   <div class="card">
     <h2>
@@ -501,6 +505,7 @@
   </div>
 </div>
 
+<!-- TAB 5: GLOSSARY -->
 <div id="panel-gloss" class="tab-panel">
   <div class="card">
     <h2>📖 Rod Wrap Terminology & Pattern Glossary</h2>
@@ -525,18 +530,27 @@
   </div>
 </div>
 
+<!-- TAB 6: VISUALWRAP IMPORTER WITH DIRECT FILE SELECTOR -->
 <div id="panel-imp" class="tab-panel">
   <div class="grid-layout">
     <div>
       <div class="card">
         <h2>Import VisualWRAP Script</h2>
+        
+        <!-- DIRECT FILE PICKER -->
+        <div style="background: #111520; border: 1px dashed var(--accent-gold); border-radius: 6px; padding: 12px; margin-bottom: 14px;">
+          <label style="color: var(--accent-gold);">📁 Load .vwp File from Downloads</label>
+          <input type="file" id="vwpFileInput" accept=".vwp,.txt" onchange="handleVwpFileUpload(event)" style="padding: 6px; font-size: 0.82rem; cursor: pointer;" />
+          <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">Tap above to select any VisualWRAP file directly from your tablet.</p>
+        </div>
+
         <div class="form-group">
           <label>Pattern Name</label>
-          <input type="text" id="importPatternName" placeholder="e.g., Custom Diamond Variant" />
+          <input type="text" id="importPatternName" placeholder="e.g., ThreadCentral Custom Pattern" />
         </div>
         <div class="form-group">
           <label>VisualWRAP Script Code</label>
-          <textarea id="importScriptText" rows="10" placeholder="CROSS, 50, 50, COLOR_1, OUT, 1, 4&#10;BOX, 40, 50, 60, 50, COLOR_2, IN, 1, 6"></textarea>
+          <textarea id="importScriptText" rows="8" placeholder="Script code will appear here or can be pasted manually..."></textarea>
         </div>
         <button type="button" class="btn" onclick="parseAndSaveVisualWrapScript()">📥 Import & Save Pattern</button>
       </div>
@@ -554,6 +568,7 @@
   </div>
 </div>
 
+<!-- TAB 7: THREAD INVENTORY -->
 <div id="panel-lib" class="tab-panel">
   <div class="card">
     <h2>➕ Add Custom Spool</h2>
@@ -628,6 +643,7 @@
   </div>
 </div>
 
+<!-- TAB 8: TAPER -->
 <div id="panel-lay" class="tab-panel">
   <div class="grid-layout">
     <div class="card">
@@ -673,6 +689,7 @@
   </div>
 </div>
 
+<!-- TAB 9: VISUALWRAP EXPORT -->
 <div id="panel-vws" class="tab-panel">
   <div class="card">
     <h2>VisualWRAP Formatted Script Export</h2>
@@ -682,7 +699,7 @@
 </div>
 
 <script>
-// TRUE MASTER CATALOG (120+ INDUSTRY SPOOLS)
+// TRUE MASTER CATALOG (120+ SPOOLS)
 const DEFAULT_CATALOG = [
   // 1. FUJI METALLIC
   { id: "fj_m901", brand: "Fuji Ultra Poly Metallic", code: "901 / 022 / M-02", name: "Gold Metallic", hex: "#CCA43B" },
@@ -709,7 +726,7 @@ const DEFAULT_CATALOG = [
   { id: "fj_501", brand: "Fuji Neon Series", code: "501", name: "Neon Orange", hex: "#FF5E00" },
   { id: "fj_502", brand: "Fuji Neon Series", code: "502", name: "Neon Pink", hex: "#FF1493" },
 
-  // 3. FUJI ULTRA POLY SOLIDS (001 - 024+)
+  // 3. FUJI ULTRA POLY SOLIDS
   { id: "fj_001", brand: "Fuji Ultra Poly", code: "001 / 01", name: "White", hex: "#FFFFFF" },
   { id: "fj_002", brand: "Fuji Ultra Poly", code: "002 / 02", name: "Black", hex: "#0A0A0A" },
   { id: "fj_003", brand: "Fuji Ultra Poly", code: "003 / 03", name: "Smoke Grey", hex: "#7D8597" },
@@ -733,7 +750,7 @@ const DEFAULT_CATALOG = [
   { id: "fj_021", brand: "Fuji Ultra Poly", code: "021", name: "Light Blue", hex: "#5DADE2" },
   { id: "fj_022", brand: "Fuji Ultra Poly", code: "022", name: "Hot Pink", hex: "#FF1493" },
 
-  // 4. FUJI NOCP SERIES (001 - 045)
+  // 4. FUJI NOCP SERIES
   { id: "fj_nop001", brand: "Fuji Ultra Poly NOCP", code: "NOP-001", name: "NOCP White", hex: "#FFFFFF" },
   { id: "fj_nop002", brand: "Fuji Ultra Poly NOCP", code: "NOP-002", name: "NOCP Black", hex: "#0D0D0D" },
   { id: "fj_nop004", brand: "Fuji Ultra Poly NOCP", code: "NOP-004", name: "NOCP Cobalt Blue", hex: "#0052A5" },
@@ -810,7 +827,7 @@ const DEFAULT_CATALOG = [
   { id: "pw_n02", brand: "ProWrap Nylon", code: "NY-02", name: "Nylon Bright White", hex: "#FAFAFA" },
   { id: "pw_n07", brand: "ProWrap Nylon", code: "NY-07", name: "Nylon Royal Blue", hex: "#0D47A1" },
 
-  // 7. FISH HAWK (RODDANCER) NYLON & OPAQUE
+  // 7. FISH HAWK NYLON & OPAQUE
   { id: "fh_206", brand: "Fish Hawk Nylon", code: "FH-206", name: "Garnet", hex: "#7B1113" },
   { id: "fh_209", brand: "Fish Hawk Nylon", code: "FH-209", name: "Goldenrod", hex: "#DAA520" },
   { id: "fh_221", brand: "Fish Hawk Nylon", code: "FH-221", name: "Orange", hex: "#FF5E00" },
@@ -829,7 +846,7 @@ const DEFAULT_CATALOG = [
   { id: "fh_op129", brand: "Fish Hawk Opaque", code: "OP-129", name: "Dark Aqua", hex: "#008B8B" },
   { id: "fh_op638", brand: "Fish Hawk Opaque", code: "OP-638", name: "Teal", hex: "#008080" },
 
-  // 8. GUDEBROD HERITAGE CLASSICS
+  // 8. GUDEBROD HERITAGE
   { id: "gb_001", brand: "Gudebrod Heritage", code: "#001", name: "Black", hex: "#000000" },
   { id: "gb_002", brand: "Gudebrod Heritage", code: "#002", name: "White", hex: "#FFFFFF" },
   { id: "gb_206", brand: "Gudebrod Heritage", code: "#206", name: "Garnet", hex: "#73000A" },
@@ -949,7 +966,7 @@ const DEFAULT_PATTERNS = [
   }
 ];
 
-const STORAGE_PREFIX = "tsp_master_v5_";
+const STORAGE_PREFIX = "tsp_master_v6_";
 let customShopSpools = [];
 let masterThreadCatalog = [...DEFAULT_CATALOG];
 let ownedThreads = [
@@ -1574,7 +1591,7 @@ function stepAll() {
   renderStepCanvas();
 }
 
-// 3D FULL REAL-WORLD CYLINDRICAL THREAD WRAP SIMULATOR
+// 3D REAL-WORLD CYLINDRICAL THREAD WRAP SIMULATOR
 function draw3DRod() {
   const canvas = document.getElementById('rodCanvas3D');
   if (!canvas) return;
@@ -1765,6 +1782,25 @@ function draw3DRod() {
 function reset3DAngle() {
   rodAxialAngle = 0;
   draw3DRod();
+}
+
+// DIRECT .VWP FILE HANDLER FOR ANDROID TABLETS
+function handleVwpFileUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const fileNameClean = file.name.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
+  const nameEl = document.getElementById('importPatternName');
+  if (nameEl) nameEl.value = fileNameClean;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const textContent = e.target.result;
+    const textEl = document.getElementById('importScriptText');
+    if (textEl) textEl.value = textContent;
+    parseAndSaveVisualWrapScript();
+  };
+  reader.readAsText(file);
 }
 
 // WRAP INSTRUCTION SHEET GENERATOR
