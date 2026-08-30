@@ -1188,7 +1188,7 @@ const DEFAULT_PATTERNS = [
   }
 ];
 
-const STORAGE_PREFIX = "tsp_master_v20_";
+const STORAGE_PREFIX = "tsp_master_v21_";
 let customShopSpools = [];
 let masterThreadCatalog = [...DEFAULT_CATALOG];
 let ownedThreads = [
@@ -1208,104 +1208,55 @@ let savedPatternLibrary = JSON.parse(JSON.stringify(DEFAULT_PATTERNS));
 let currentPatternTitle = savedPatternLibrary[0].name;
 let layers = JSON.parse(JSON.stringify(savedPatternLibrary[0].layers));
 
-// AUTOMATIC STORAGE MIGRATION BRIDGE (Pulls forward data from any previous tsp_master_vXX key)
-function migrateOldStorage() {
-  for (let i = 1; i < 20; i++) {
-    const oldKey = `tsp_master_v${i}_`;
+// ROBUST STORAGE & MIGRATION LOADER
+function loadAllStorageData() {
+  for (let i = 20; i >= 1; i--) {
+    const key = `tsp_master_v${i}_`;
     try {
-      const oldOwned = JSON.parse(localStorage.getItem(oldKey + "owned"));
-      if (Array.isArray(oldOwned) && oldOwned.length > 0) {
-        ownedThreads = oldOwned;
-        break;
-      }
+      const owned = JSON.parse(localStorage.getItem(key + "owned"));
+      if (Array.isArray(owned) && owned.length > 0) { ownedThreads = owned; break; }
     } catch(e) {}
   }
 
-  for (let i = 1; i < 20; i++) {
-    const oldKey = `tsp_master_v${i}_`;
+  for (let i = 20; i >= 1; i--) {
+    const key = `tsp_master_v${i}_`;
     try {
-      const oldPats = JSON.parse(localStorage.getItem(oldKey + "pats"));
-      if (Array.isArray(oldPats) && oldPats.length > 0) {
-        DEFAULT_PATTERNS.forEach(def => {
-          if (!oldPats.some(p => p.name === def.name)) oldPats.push(def);
-        });
-        savedPatternLibrary = oldPats;
-        break;
-      }
-    } catch(e) {}
-  }
-
-  for (let i = 1; i < 20; i++) {
-    const oldKey = `tsp_master_v${i}_`;
-    try {
-      const oldCustom = JSON.parse(localStorage.getItem(oldKey + "custom"));
-      if (Array.isArray(oldCustom) && oldCustom.length > 0) {
-        customShopSpools = oldCustom;
+      const custom = JSON.parse(localStorage.getItem(key + "custom"));
+      if (Array.isArray(custom) && custom.length > 0) {
+        customShopSpools = custom;
         masterThreadCatalog = [...DEFAULT_CATALOG, ...customShopSpools];
         break;
       }
     } catch(e) {}
   }
 
-  for (let i = 1; i < 20; i++) {
-    const oldKey = `tsp_master_v${i}_`;
+  for (let i = 20; i >= 1; i--) {
+    const key = `tsp_master_v${i}_`;
     try {
-      const oldCaps = JSON.parse(localStorage.getItem(oldKey + "caps"));
-      if (oldCaps) { spoolCapacities = oldCaps; break; }
+      const pats = JSON.parse(localStorage.getItem(key + "pats"));
+      if (Array.isArray(pats) && pats.length > 0) {
+        DEFAULT_PATTERNS.forEach(def => {
+          if (!pats.some(p => p.name === def.name)) pats.push(def);
+        });
+        savedPatternLibrary = pats;
+        break;
+      }
     } catch(e) {}
   }
 
-  for (let i = 1; i < 20; i++) {
-    const oldKey = `tsp_master_v${i}_`;
-    try {
-      const oldDeds = JSON.parse(localStorage.getItem(oldKey + "deds"));
-      if (oldDeds) { manualDeductions = oldDeds; break; }
-    } catch(e) {}
-  }
-
-  for (let i = 1; i < 20; i++) {
-    const oldKey = `tsp_master_v${i}_`;
-    try {
-      const oldBlanks = JSON.parse(localStorage.getItem(oldKey + "blanks"));
-      if (Array.isArray(oldBlanks) && oldBlanks.length > 0) { savedBlanksVault = oldBlanks; break; }
-    } catch(e) {}
-  }
-
-  for (let i = 1; i < 20; i++) {
-    const oldKey = `tsp_master_v${i}_`;
-    try {
-      const oldBuilds = JSON.parse(localStorage.getItem(oldKey + "builds"));
-      if (Array.isArray(oldBuilds) && oldBuilds.length > 0) { savedBuildRecipes = oldBuilds; break; }
-    } catch(e) {}
-  }
+  try {
+    const caps = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "caps"));
+    if (caps) spoolCapacities = caps;
+    const deds = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "deds"));
+    if (deds) manualDeductions = deds;
+    const blanks = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "blanks"));
+    if (Array.isArray(blanks) && blanks.length > 0) savedBlanksVault = blanks;
+    const builds = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "builds"));
+    if (Array.isArray(builds)) savedBuildRecipes = builds;
+  } catch(e) {}
 }
 
-migrateOldStorage();
-
-try {
-  const custom = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "custom"));
-  if (Array.isArray(custom)) {
-    customShopSpools = custom;
-    masterThreadCatalog = [...DEFAULT_CATALOG, ...customShopSpools];
-  }
-  const owned = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "owned"));
-  if (Array.isArray(owned) && owned.length > 0) ownedThreads = owned;
-  const caps = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "caps"));
-  if (caps) spoolCapacities = caps;
-  const deds = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "deds"));
-  if (deds) manualDeductions = deds;
-  const blanks = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "blanks"));
-  if (Array.isArray(blanks) && blanks.length > 0) savedBlanksVault = blanks;
-  const builds = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "builds"));
-  if (Array.isArray(builds)) savedBuildRecipes = builds;
-  const pats = JSON.parse(localStorage.getItem(STORAGE_PREFIX + "pats"));
-  if (Array.isArray(pats) && pats.length > 0) {
-    DEFAULT_PATTERNS.forEach(def => {
-      if (!pats.some(p => p.name === def.name)) pats.push(def);
-    });
-    savedPatternLibrary = pats;
-  }
-} catch (e) {}
+loadAllStorageData();
 
 let currentStepIndex = 0;
 let flattenedThreadSteps = [];
@@ -1421,7 +1372,7 @@ function applyQuickPreset(type) {
     celtic: "Celtic Interlocking Weave",
     cube: "3D Cube Optical Block"
   };
-  const target = DEFAULT_PATTERNS.find(p => p.name === map[type]);
+  const target = savedPatternLibrary.find(p => p.name === map[type]) || DEFAULT_PATTERNS.find(p => p.name === map[type]);
   if (target) {
     currentPatternTitle = target.name;
     layers = JSON.parse(JSON.stringify(target.layers));
@@ -2575,6 +2526,193 @@ function importMasterMasterBackup(e) {
   if (e.target.files && e.target.files[0]) r.readAsText(e.target.files[0]);
 }
 
+// INVENTORY & BACKUP WITH MANUAL OVERRIDES
+function exportInventory() {
+  const data = { owned: ownedThreads, custom: customShopSpools, caps: spoolCapacities, deds: manualDeductions };
+  const a = document.createElement('a');
+  a.href = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data));
+  a.download = "rod_thread_inventory.json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function importInventory(e) {
+  const r = new FileReader();
+  r.onload = function(evt) {
+    try {
+      const p = JSON.parse(evt.target.result);
+      if (Array.isArray(p)) ownedThreads = p;
+      else if (p.owned) {
+        ownedThreads = p.owned || [];
+        customShopSpools = p.custom || [];
+        spoolCapacities = p.caps || {};
+        manualDeductions = p.deds || {};
+        localStorage.setItem(STORAGE_PREFIX + "custom", JSON.stringify(customShopSpools));
+        localStorage.setItem(STORAGE_PREFIX + "caps", JSON.stringify(spoolCapacities));
+        localStorage.setItem(STORAGE_PREFIX + "deds", JSON.stringify(manualDeductions));
+        masterThreadCatalog = [...DEFAULT_CATALOG, ...customShopSpools];
+      }
+      localStorage.setItem(STORAGE_PREFIX + "owned", JSON.stringify(ownedThreads));
+      renderThreadLibrary();
+      renderLayersUI();
+      populateGuideColorDropdowns();
+      syncAllEngines();
+      alert("Inventory restored!");
+    } catch (err) { alert("Invalid backup file."); }
+  };
+  if (e.target.files && e.target.files[0]) r.readAsText(e.target.files[0]);
+}
+
+function toggleOwnThread(id) {
+  if (ownedThreads.includes(id)) ownedThreads = ownedThreads.filter(t => t !== id);
+  else {
+    ownedThreads.push(id);
+    if (!spoolCapacities[id]) spoolCapacities[id] = 100;
+    if (!manualDeductions[id]) manualDeductions[id] = 0;
+  }
+  localStorage.setItem(STORAGE_PREFIX + "owned", JSON.stringify(ownedThreads));
+  renderThreadLibrary();
+  renderLayersUI();
+  syncAllEngines();
+}
+
+function renderThreadLibrary() {
+  const grid = document.getElementById('threadGrid');
+  if (!grid) return;
+  const brand = document.getElementById('brandFilter')?.value || 'ALL';
+  const owned = document.getElementById('ownedFilter')?.value || 'ALL';
+  const search = (document.getElementById('threadSearch')?.value || '').toLowerCase().trim();
+
+  const cEl = document.getElementById('inventoryCount');
+  if (cEl) cEl.textContent = `${ownedThreads.length} Spools Owned`;
+
+  const consumption = calculateThreadConsumption();
+
+  const filtered = masterThreadCatalog.filter(t => {
+    return (brand === "ALL" || t.brand === brand) &&
+      (owned === "ALL" || ownedThreads.includes(t.id)) &&
+      (search === "" || t.name.toLowerCase().includes(search) || t.code.toLowerCase().includes(search) || t.brand.toLowerCase().includes(search));
+  });
+
+  grid.innerHTML = filtered.map(t => {
+    const isOwned = ownedThreads.includes(t.id);
+    const capacity = spoolCapacities[t.id] || 100;
+    const yardsUsedInWrap = consumption[t.id] || 0;
+    const manualDeduct = manualDeductions[t.id] || 0;
+    const remainingYards = Math.max(0, capacity - yardsUsedInWrap - manualDeduct);
+    const percentLeft = Math.max(0, Math.min(100, (remainingYards / capacity) * 100));
+
+    return `
+      <div class="thread-card ${isOwned ? 'owned' : ''}">
+        <div class="thread-card-top">
+          <div class="thread-swatch" style="background: ${t.hex};"></div>
+          <div class="thread-info">
+            <div class="brand-tag">${t.brand}</div>
+            <div class="thread-name">${t.name}</div>
+            <div class="thread-code">Code: ${t.code}</div>
+          </div>
+          <input type="checkbox" ${isOwned ? 'checked' : ''} onchange="toggleOwnThread('${t.id}')" style="width:18px; height:18px; cursor:pointer;" />
+        </div>
+        ${isOwned ? `
+          <div style="font-size:0.7rem; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+            <span>Spool: 
+              <select onchange="updateSpoolCapacity('${t.id}', this.value)" style="padding:1px 3px; font-size:0.7rem; width:auto; display:inline-block;">
+                <option value="100" ${capacity===100?'selected':''}>100 Yd</option>
+                <option value="250" ${capacity===250?'selected':''}>250 Yd</option>
+                <option value="500" ${capacity===500?'selected':''}>500 Yd</option>
+                <option value="1000" ${capacity===1000?'selected':''}>1000 Yd</option>
+              </select>
+            </span>
+            <span style="color:${remainingYards < 15 ? '#e63946' : 'var(--accent-cyan)'}; font-weight:bold;">${remainingYards.toFixed(1)} Yds Left</span>
+          </div>
+
+          <div style="font-size:0.7rem; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+            <span>Manual Deduct (Yds):</span>
+            <input type="number" value="${manualDeduct}" step="1" min="0" max="${capacity}" style="width:60px; padding:1px 4px; font-size:0.7rem;" onchange="updateManualDeduction('${t.id}', this.value)" title="Deduct yardage used outside of wrap pattern" />
+          </div>
+
+          <div class="thread-meter-bar">
+            <div class="thread-meter-fill" style="width: ${percentLeft}%; background: ${remainingYards < 15 ? '#e63946' : 'var(--accent-cyan)'};"></div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+}
+
+function addCustomSpool() {
+  const brand = document.getElementById('customBrand')?.value.trim() || "Custom / Shop Spools";
+  const code = document.getElementById('customCode')?.value.trim();
+  const name = document.getElementById('customName')?.value.trim();
+  const hex = document.getElementById('customColor')?.value || '#00509d';
+
+  if (!code || !name) {
+    alert("Please enter both a color code and name.");
+    return;
+  }
+  const id = "cust_" + Date.now();
+  const newSpool = { id, brand, code, name, hex };
+  customShopSpools.push(newSpool);
+  spoolCapacities[id] = 100;
+  manualDeductions[id] = 0;
+  localStorage.setItem(STORAGE_PREFIX + "custom", JSON.stringify(customShopSpools));
+  localStorage.setItem(STORAGE_PREFIX + "caps", JSON.stringify(spoolCapacities));
+  localStorage.setItem(STORAGE_PREFIX + "deds", JSON.stringify(manualDeductions));
+  masterThreadCatalog = [...DEFAULT_CATALOG, ...customShopSpools];
+
+  if (!ownedThreads.includes(id)) ownedThreads.push(id);
+  localStorage.setItem(STORAGE_PREFIX + "owned", JSON.stringify(ownedThreads));
+
+  document.getElementById('customCode').value = '';
+  document.getElementById('customName').value = '';
+  renderThreadLibrary();
+  renderLayersUI();
+  populateGuideColorDropdowns();
+  syncAllEngines();
+  alert(`Added "${name}"!`);
+}
+
+// PATTERN LIBRARY RENDERER
+function renderPatternLibraryList() {
+  const list = document.getElementById('patternLibraryList');
+  if (!list) return;
+  const count = document.getElementById('patternCount');
+  if (count) count.textContent = `${savedPatternLibrary.length} Patterns Saved`;
+  list.innerHTML = savedPatternLibrary.map((pat, idx) => `
+    <div class="pattern-card">
+      <div>
+        <h3>${pat.name}</h3>
+        <p>${pat.axis || 4}-Axis • ${pat.layers.length} Thread Bands</p>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button type="button" class="btn btn-outline btn-sm" onclick="loadPatternFromLibrary(${idx})">Load</button>
+        <button type="button" class="btn btn-danger btn-sm" onclick="deletePatternFromLibrary(${idx})">&times;</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadPatternFromLibrary(index) {
+  const target = savedPatternLibrary[index];
+  if (!target) return;
+  currentPatternTitle = target.name;
+  layers = JSON.parse(JSON.stringify(target.layers));
+  const ax = document.getElementById('patternAxis');
+  if (ax) ax.value = target.axis || 4;
+  renderLayersUI();
+  populateGuideColorDropdowns();
+  syncAllEngines();
+}
+
+function deletePatternFromLibrary(index) {
+  if (confirm(`Delete "${savedPatternLibrary[index].name}"?`)) {
+    savedPatternLibrary.splice(index, 1);
+    localStorage.setItem(STORAGE_PREFIX + "pats", JSON.stringify(savedPatternLibrary));
+    renderPatternLibraryList();
+  }
+}
+
 // GUIDE LAYOUT & SPIRAL ACID WRAP CALCULATOR
 function calculateGuideSpacing() {
   const container = document.getElementById('guideResults');
@@ -2646,6 +2784,413 @@ function calculateGuideSpacing() {
 
   html += `</table>`;
   container.innerHTML = html;
+}
+
+// 1:1 PRINTABLE SCALE TAPER RULER TAPE
+function printScaleTape() {
+  const buttD = parseFloat(document.getElementById('buttDiam')?.value || 0.520);
+  const tipD = parseFloat(document.getElementById('tipDiam')?.value || 0.410);
+  const crosses = parseInt(document.getElementById('targetCrosses')?.value || 4);
+  const axis = parseInt(document.getElementById('axisCount')?.value || 4);
+  const unit = document.getElementById('calcUnit')?.value || "in";
+
+  const buttCirc = buttD * Math.PI;
+  const tipCirc = tipD * Math.PI;
+  const taperDelta = (buttCirc - tipCirc) / crosses;
+
+  let tapeHtml = `
+    <div style="font-family:monospace; padding:10px; border:1px solid #000;">
+      <h2 style="font-size:14px; margin-bottom:4px;">THREAD STUDIO PRO - 1:1 SCALE BLANK ALIGNMENT TAPE</h2>
+      <p style="font-size:10px; margin-bottom:8px;">Butt: ${buttD}" | Tip: ${tipD}" | ${crosses} Crosses | ${axis}-Axis | Scale: 100% True Size</p>
+      <div style="border-top:2px solid #000; border-bottom:2px solid #000; padding:15px 0; position:relative;">
+  `;
+
+  let cumDist = 0;
+  for (let i = 1; i <= crosses; i++) {
+    const interval = buttCirc - (taperDelta * (i - 0.5));
+    cumDist += interval;
+    const axStep = interval / axis;
+    tapeHtml += `
+      <div style="margin-bottom:8px; border-left:3px solid #000; padding-left:6px;">
+        <strong>CROSS ${i} CENTERLINE: ${cumDist.toFixed(3)}${unit}</strong> (Interval: ${interval.toFixed(3)}${unit})<br/>
+        <span style="font-size:9px;">0° [Top] | 90° (+${axStep.toFixed(3)}") | 180° (+${(axStep*2).toFixed(3)}") | 270° (+${(axStep*3).toFixed(3)}")</span>
+      </div>
+    `;
+  }
+
+  tapeHtml += `
+      </div>
+      <p style="font-size:9px; margin-top:8px;">INSTRUCTIONS: Print at 100% scale (No Fit/Shrink). Cut strip along black line, tape along 0° blank axis, wrap over layout marks, and peel tape.</p>
+    </div>
+  `;
+
+  const printArea = document.getElementById('printableTapeArea');
+  if (printArea) {
+    printArea.innerHTML = tapeHtml;
+    window.print();
+  }
+}
+
+// SPOOL CONSUMPTION & YARDAGE TRACKER WITH MANUAL OVERRIDE
+function calculateThreadConsumption() {
+  const reps = parseInt(document.getElementById('repeats')?.value || 4);
+  const totLen = parseFloat(document.getElementById('targetWrapLength')?.value || 6.0);
+  const buttD = parseFloat(document.getElementById('buttDiam')?.value || 0.520);
+  const tipD = parseFloat(document.getElementById('tipDiam')?.value || 0.410);
+  const avgCirc = ((buttD + tipD) / 2) * Math.PI;
+  const singleHelicalInch = Math.sqrt(Math.pow(avgCirc, 2) + Math.pow(totLen / reps, 2));
+
+  const consumptionPerSpool = {};
+
+  layers.forEach(layer => {
+    const inchesUsed = singleHelicalInch * 2 * layer.passes * reps;
+    const yardsUsed = inchesUsed / 36;
+    consumptionPerSpool[layer.threadId] = (consumptionPerSpool[layer.threadId] || 0) + yardsUsed;
+  });
+
+  return consumptionPerSpool;
+}
+
+function updateSpoolCapacity(threadId, val) {
+  spoolCapacities[threadId] = parseFloat(val) || 100;
+  localStorage.setItem(STORAGE_PREFIX + "caps", JSON.stringify(spoolCapacities));
+  renderThreadLibrary();
+}
+
+function updateManualDeduction(threadId, val) {
+  manualDeductions[threadId] = Math.max(0, parseFloat(val) || 0);
+  localStorage.setItem(STORAGE_PREFIX + "deds", JSON.stringify(manualDeductions));
+  renderThreadLibrary();
+}
+
+// DIRECT .VWP FILE HANDLER FOR ANDROID TABLETS
+function handleVwpFileUpload(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+
+  const fileNameClean = file.name.replace(/\.[^/.]+$/, "").replace(/_/g, " ");
+  const nameEl = document.getElementById('importPatternName');
+  if (nameEl) nameEl.value = fileNameClean;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const textContent = e.target.result;
+    const textEl = document.getElementById('importScriptText');
+    if (textEl) textEl.value = textContent;
+    parseAndSaveVisualWrapScript();
+  };
+  reader.readAsText(file);
+}
+
+// WRAP INSTRUCTION SHEET
+function generateWrapSheet() {
+  const container = document.getElementById('wrapSheetContent');
+  if (!container) return;
+  const axis = parseInt(document.getElementById('patternAxis')?.value || 4);
+  const reps = parseInt(document.getElementById('repeats')?.value || 4);
+  const totLen = parseFloat(document.getElementById('targetWrapLength')?.value || 6.0);
+  const unit = document.getElementById('wrapUnit')?.value || "in";
+
+  const repeatInterval = totLen / reps;
+  const axisStep = repeatInterval / axis;
+  const consumption = calculateThreadConsumption();
+
+  let html = `
+    <div style="background:#11141c; padding:14px; border-radius:6px; margin-bottom:14px; border:1px solid var(--border-color);">
+      <h3 style="color:var(--accent-gold); font-size:1.05rem; margin-bottom:4px;">${currentPatternTitle}</h3>
+      <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:8px;">
+        Layout: <strong>${axis}-Axis</strong> • Repeats: <strong>${reps}</strong> • Target Length: <strong>${totLen.toFixed(2)} ${unit}</strong> (${repeatInterval.toFixed(3)} ${unit} / repeat)
+      </p>
+      <p style="font-size:0.78rem; color:var(--accent-cyan);">
+        Longitudinal Axis Crossing Marks @ every <strong>${axisStep.toFixed(3)} ${unit}</strong> along the rod blank.
+      </p>
+    </div>
+    <table>
+      <tr><th>Band #</th><th>Spool & Color</th><th>Passes (Threads)</th><th>Estimated Usage</th><th>Physical Placement & Helical Route</th></tr>
+  `;
+
+  layers.forEach((l, idx) => {
+    const thread = getThreadInfo(l.threadId);
+    const yardsUsed = (consumption[l.threadId] || 0).toFixed(1);
+    
+    let routeDesc = `<strong>Forward:</strong> Start @ Butt 0° (0.00${unit}) ➔ Cross ${axis} axes @ ${(axisStep).toFixed(2)}${unit} intervals to Tip (${totLen.toFixed(2)}${unit}) ➔ <strong>Return Pass</strong>.`;
+    let placementText = l.type === "OUT" ? "Pack to <strong>OUTSIDE</strong> edge of previous band (expanding)." : (l.type === "IN" ? "Pack to <strong>INSIDE</strong> edge (collapsing)." : "Wrap <strong>OUTER BORDER</strong> to frame diamond center.");
+
+    html += `
+      <tr>
+        <td><strong>Band ${idx + 1}</strong></td>
+        <td><span style="color:${thread.hex}; font-size:1.1rem;">■</span> <strong>${thread.name}</strong></td>
+        <td><strong>${l.passes}</strong> Passes (${l.passes * 2} Threads)</td>
+        <td style="color:var(--accent-cyan); font-weight:600;">${yardsUsed} Yds</td>
+        <td style="font-size:0.78rem; line-height:1.4;">
+          <div style="color:#00ffaa; margin-bottom:4px;">${placementText}</div>
+          ${routeDesc}
+        </td>
+      </tr>
+    `;
+  });
+  html += `</table>`;
+  container.innerHTML = html;
+}
+
+// TAPER CALCULATOR WITH TWO-WAY AUTO-SYNC
+function toggleSyncMode(isSynced) {
+  const crossesInput = document.getElementById('targetCrosses');
+  const unitSelect = document.getElementById('calcUnit');
+  const axisSelect = document.getElementById('axisCount');
+
+  if (isSynced) {
+    if (crossesInput) crossesInput.disabled = true;
+    if (unitSelect) unitSelect.disabled = true;
+    if (axisSelect) axisSelect.disabled = true;
+    calculateLayout();
+  } else {
+    if (crossesInput) crossesInput.disabled = false;
+    if (unitSelect) unitSelect.disabled = false;
+    if (axisSelect) axisSelect.disabled = false;
+  }
+}
+
+function calculateLayout() {
+  const results = document.getElementById('layoutResults');
+  if (!results) return;
+
+  const isSynced = document.getElementById('syncWithDesigner')?.checked ?? true;
+
+  if (isSynced) {
+    const designerReps = document.getElementById('repeats')?.value || 4;
+    const designerUnit = document.getElementById('wrapUnit')?.value || 'in';
+    const designerAxis = document.getElementById('patternAxis')?.value || 4;
+
+    const cInput = document.getElementById('targetCrosses');
+    const uInput = document.getElementById('calcUnit');
+    const aInput = document.getElementById('axisCount');
+
+    if (cInput) { cInput.value = designerReps; cInput.disabled = true; }
+    if (uInput) { uInput.value = designerUnit; uInput.disabled = true; }
+    if (aInput) { aInput.value = designerAxis; aInput.disabled = true; }
+  }
+
+  const unit = document.getElementById('calcUnit')?.value || 'in';
+  const buttD = parseFloat(document.getElementById('buttDiam')?.value || 0.520);
+  const tipD = parseFloat(document.getElementById('tipDiam')?.value || 0.410);
+  const crosses = parseInt(document.getElementById('targetCrosses')?.value || 4);
+  const axis = parseInt(document.getElementById('axisCount')?.value || 4);
+
+  const buttCirc = buttD * Math.PI;
+  const tipCirc = tipD * Math.PI;
+  const taperDelta = (buttCirc - tipCirc) / crosses;
+
+  let html = `
+    <table style="margin-bottom:12px;">
+      <tr><th>Parameter</th><th>Butt Side</th><th>Tip Side</th></tr>
+      <tr><td>Circumference</td><td>${buttCirc.toFixed(3)} ${unit}</td><td>${tipCirc.toFixed(3)} ${unit}</td></tr>
+      <tr><td>Square Spacing</td><td>${buttCirc.toFixed(3)} ${unit}</td><td>${tipCirc.toFixed(3)} ${unit}</td></tr>
+    </table>
+    <h3 style="font-size:0.85rem; color:var(--accent-gold); margin-bottom:6px;">Progressive Taper Axis Marks (${axis}-Axis)</h3>
+    <table>
+      <tr><th>Cross #</th><th>Interval Spacing</th><th>Cumulative Distance</th><th>Axis Offset (${axis} Axis)</th></tr>
+  `;
+
+  let cumDist = 0;
+  for (let i = 1; i <= crosses; i++) {
+    const interval = buttCirc - (taperDelta * (i - 0.5));
+    cumDist += interval;
+    html += `
+      <tr>
+        <td><strong>Cross ${i}</strong></td>
+        <td>${interval.toFixed(3)} ${unit}</td>
+        <td><strong>${cumDist.toFixed(3)} ${unit}</strong></td>
+        <td>${(interval / axis).toFixed(3)} ${unit}</td>
+      </tr>
+    `;
+  }
+  html += `</table>`;
+  results.innerHTML = html;
+
+  const badge = document.getElementById('taperSummaryBadge');
+  if (badge) {
+    badge.innerHTML = `
+      Progressive Taper Total Length: <strong>${cumDist.toFixed(3)} ${unit}</strong> over <strong>${crosses} Crosses</strong><br/>
+      <span style="font-size:0.75rem; color:var(--text-muted);">Calculated using Dale Clemens Progressive Diminishing Spacing Formula.</span>
+    `;
+  }
+}
+
+// EXPORT VISUALWRAP SCRIPT
+function updateVisualWrapScript() {
+  const out = document.getElementById('scriptOutput');
+  if (!out) return;
+  const axis = document.getElementById('patternAxis')?.value || 4;
+  let s = `; VisualWRAP Script Export\n; Pattern: ${currentPatternTitle}\n\n[PATTERN_HEADER]\nTYPE=CROSS_WRAP\nAXIS=${axis}\n\n[SEQUENCE]\n`;
+
+  layers.forEach((l, idx) => {
+    const thread = masterThreadCatalog.find(t => t.id === l.threadId);
+    const comm = thread ? ` ; ${thread.brand} ${thread.code}` : '';
+    const off = l.offset || (idx * 12);
+    if (l.geo === "CROSS") s += `CROSS, 50, 50, COLOR_${idx + 1}, ${l.type}, 1, ${l.passes}${comm}\n`;
+    else if (l.geo === "BOX") s += `BOX, ${50 - off}, 50, ${50 + off}, 50, COLOR_${idx + 1}, ${l.type}, 1, ${l.passes}${comm}\n`;
+    else if (l.geo === "CHEVRON") s += `CHEVRON, 50, 50, COLOR_${idx + 1}, ${l.type}, 1, ${l.passes}${comm}\n`;
+    else s += `OFFSET, 50, 50, COLOR_${idx + 1}, ${l.type}, 1, ${l.passes}${comm}\n`;
+  });
+  s += `\n; End of Pattern`;
+  out.textContent = s;
+}
+
+function copyScript() {
+  const text = document.getElementById('scriptOutput')?.textContent || '';
+  navigator.clipboard.writeText(text).then(() => alert("VisualWRAP script copied to clipboard!"));
+}
+
+// UNIVERSAL VISUALWRAP PARSER
+function parseAndSaveVisualWrapScript() {
+  const rawText = document.getElementById('importScriptText')?.value || '';
+  let nameInput = document.getElementById('importPatternName')?.value.trim() || ("Imported Pattern " + (savedPatternLibrary.length + 1));
+  
+  if (!rawText.trim()) {
+    alert("Please paste VisualWRAP script code or choose a .vwp file first.");
+    return;
+  }
+
+  const lines = rawText.split(/\r?\n/);
+  const parsedLayers = [];
+  let detectedAxis = null;
+  const defaultSpools = masterThreadCatalog.filter(t => ownedThreads.includes(t.id));
+
+  lines.forEach(line => {
+    let clean = line.trim();
+    if (!clean) return;
+
+    const titleMatch = clean.match(/^TITLE\s*=\s*(.+)/i) || clean.match(/^PATTERN\s*=\s*(.+)/i);
+    if (titleMatch) {
+      nameInput = titleMatch[1].trim();
+      if (document.getElementById('importPatternName')) {
+        document.getElementById('importPatternName').value = nameInput;
+      }
+    }
+
+    const axisMatch = clean.match(/AXIS\s*[:=]\s*(\d+)/i) || clean.match(/LAYOUT\s*[:=]\s*(\d+)/i) || clean.match(/GRID\s*[:=]\s*(\d+)/i);
+    if (axisMatch) detectedAxis = parseInt(axisMatch[1]);
+  });
+
+  if (!detectedAxis) {
+    const fullUpper = (rawText + " " + nameInput).toUpperCase();
+    if (fullUpper.includes("8-POINT") || fullUpper.includes("8-AXIS") || fullUpper.includes("SPIDER") || fullUpper.includes("OCTAGONAL")) detectedAxis = 8;
+    else if (fullUpper.includes("6-POINT") || fullUpper.includes("6-AXIS") || fullUpper.includes("HEX")) detectedAxis = 6;
+    else if (fullUpper.includes("2-AXIS") || fullUpper.includes("CHEVRON SINGLE")) detectedAxis = 2;
+    else detectedAxis = 4;
+  }
+
+  lines.forEach(line => {
+    let clean = line.trim();
+    if (!clean) return;
+
+    clean = clean.split(';')[0].split('//')[0].split('#')[0].trim();
+    if (!clean) return;
+
+    if (clean.includes('=')) {
+      const parts = clean.split('=');
+      const key = parts[0].trim().toUpperCase();
+      const val = parts.slice(1).join('=').trim();
+      if (/^(T\d+|PASS\d+|LAYER\d+|BAND\d+|LINE\d+|P\d+)$/i.test(key) || val.includes(',')) clean = val;
+      else return;
+    }
+
+    if (clean.startsWith('[') && clean.endsWith(']')) return;
+    if (!clean.includes(',') && clean.includes(' ')) clean = clean.replace(/\s+/g, ',');
+
+    const tokens = clean.split(',').map(t => t.trim().toUpperCase()).filter(t => t.length > 0);
+    if (tokens.length === 0) return;
+
+    let geo = "CROSS";
+    let direction = "OUT";
+    let passes = 4;
+    let spoolIndex = parsedLayers.length % (defaultSpools.length || 1);
+    let isValid = false;
+
+    const firstTok = tokens[0];
+
+    if (["CROSS", "BOX", "CHEVRON", "OFFSET", "DIAMOND", "STAR", "WRAP", "IN", "OUT"].includes(firstTok)) {
+      isValid = true;
+      if (firstTok === "BOX") geo = "BOX";
+      else if (firstTok === "CHEVRON") geo = "CHEVRON";
+      else if (firstTok === "OFFSET") geo = "OFFSET";
+
+      tokens.forEach((tok, tIdx) => {
+        if (tok === "IN" || tok === "OUT" || tok === "BOX") direction = tok;
+        if (tok.startsWith("COLOR_") || tok.startsWith("COL_") || tok.startsWith("C_") || tok.startsWith("C")) {
+          const cNum = parseInt(tok.replace(/\D/g, ''));
+          if (!isNaN(cNum) && cNum > 0) spoolIndex = (cNum - 1) % (defaultSpools.length || 1);
+        }
+        if (tIdx > 0 && !isNaN(parseInt(tok)) && parseInt(tok) > 0 && parseInt(tok) <= 200) passes = parseInt(tok);
+      });
+    } else {
+      const numbers = tokens.map(t => parseInt(t.replace(/\D/g, ''))).filter(n => !isNaN(n));
+      if (numbers.length >= 2) {
+        isValid = true;
+        if (numbers.length >= 3 && [1, 2, 3, 4].includes(numbers[2])) {
+          if (numbers[2] === 2) geo = "BOX";
+          else if (numbers[2] === 3) geo = "CHEVRON";
+          else if (numbers[2] === 4) geo = "OFFSET";
+        } else if (numbers.length >= 4 && [1, 2, 3, 4].includes(numbers[3])) {
+          if (numbers[3] === 2) geo = "BOX";
+          else if (numbers[3] === 3) geo = "CHEVRON";
+          else if (numbers[3] === 4) geo = "OFFSET";
+        }
+
+        if (numbers.length >= 4 && [1, 2, 3].includes(numbers[3])) {
+          if (numbers[3] === 2) direction = "IN";
+          else if (numbers[3] === 3) direction = "BOX";
+        }
+
+        if (numbers.length >= 2 && numbers[1] > 0 && numbers[1] <= 100) passes = numbers[1];
+        else if (numbers.length >= 6 && numbers[5] > 0 && numbers[5] <= 100) passes = numbers[5];
+        else passes = numbers[numbers.length - 1] || 4;
+
+        if (numbers.length >= 5 && numbers[4] > 0) spoolIndex = (numbers[4] - 1) % (defaultSpools.length || 1);
+      }
+    }
+
+    if (isValid) {
+      const selectedSpool = defaultSpools[spoolIndex] || masterThreadCatalog[0];
+      parsedLayers.push({
+        threadId: selectedSpool.id,
+        geo: geo,
+        offset: parsedLayers.length * 12,
+        passes: passes,
+        type: direction
+      });
+    }
+  });
+
+  if (parsedLayers.length === 0) {
+    alert("Could not extract wrapping passes from this file.");
+    return;
+  }
+
+  const finalName = document.getElementById('importPatternName')?.value.trim() || nameInput;
+  const newPattern = { name: finalName, axis: detectedAxis, layers: parsedLayers };
+
+  savedPatternLibrary.unshift(newPattern);
+  try {
+    localStorage.setItem(STORAGE_PREFIX + "pats", JSON.stringify(savedPatternLibrary));
+  } catch (e) {}
+
+  currentPatternTitle = newPattern.name;
+  layers = JSON.parse(JSON.stringify(newPattern.layers));
+  
+  const axEl = document.getElementById('patternAxis');
+  if (axEl) axEl.value = newPattern.axis;
+
+  renderPatternLibraryList();
+  renderLayersUI();
+  populateGuideColorDropdowns();
+  syncAllEngines();
+
+  const stepRadio = document.getElementById('t-step');
+  if (stepRadio) stepRadio.checked = true;
+
+  alert(`Auto-detected ${detectedAxis}-Axis! Loaded "${finalName}" with ${parsedLayers.length} thread bands into your workbench!`);
 }
 
 // 3D TOUCH & DRAG
