@@ -530,7 +530,7 @@
   </div>
 </div>
 
-<!-- TAB 6: VISUALWRAP IMPORTER WITH UNIVERSAL DUAL PARSER -->
+<!-- TAB 6: VISUALWRAP IMPORTER WITH UNIVERSAL FORMAT SUPPORT -->
 <div id="panel-imp" class="tab-panel">
   <div class="grid-layout">
     <div>
@@ -541,7 +541,7 @@
         <div style="background: #111520; border: 1px dashed var(--accent-gold); border-radius: 6px; padding: 12px; margin-bottom: 14px;">
           <label style="color: var(--accent-gold);">📁 Load .vwp File from Downloads</label>
           <input type="file" id="vwpFileInput" accept=".vwp,.txt" onchange="handleVwpFileUpload(event)" style="padding: 6px; font-size: 0.82rem; cursor: pointer;" />
-          <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">Select any .vwp file from your device to auto-load and compile.</p>
+          <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 4px;">Supports all ThreadCentral, VisualWRAP v1/v2, INI, and custom scripts.</p>
         </div>
 
         <div class="form-group">
@@ -966,7 +966,7 @@ const DEFAULT_PATTERNS = [
   }
 ];
 
-const STORAGE_PREFIX = "tsp_master_v8_";
+const STORAGE_PREFIX = "tsp_master_v9_";
 let customShopSpools = [];
 let masterThreadCatalog = [...DEFAULT_CATALOG];
 let ownedThreads = [
@@ -2006,7 +2006,7 @@ function addCustomSpool() {
   alert(`Added "${name}"!`);
 }
 
-// UNIVERSAL DUAL PARSER: HANDLES BOTH TEXT KEYWORDS & NUMERIC CSV ARRAYS
+// UNIVERSAL VISUALWRAP / THREADCENTRAL PARSER ENGINE
 function parseAndSaveVisualWrapScript() {
   const rawText = document.getElementById('importScriptText')?.value || '';
   const nameInput = document.getElementById('importPatternName')?.value.trim() || ("Imported Pattern " + (savedPatternLibrary.length + 1));
@@ -2029,39 +2029,60 @@ function parseAndSaveVisualWrapScript() {
     clean = clean.split(';')[0].split('//')[0].split('#')[0].trim();
     if (!clean) return;
 
-    // Check for explicit Axis command
+    // Check for explicit Axis declaration
     const axisMatch = clean.match(/AXIS\s*[:=]\s*(\d+)/i);
     if (axisMatch) {
       detectedAxis = parseInt(axisMatch[1]) || 4;
       return;
     }
 
-    // Ignore non-sequence block headers
-    if (clean.startsWith('[') && clean.endsWith(']')) return;
-    if (clean.includes('=') && !clean.includes(',')) return;
+    // Check for Pattern Name / Title inside INI file
+    const titleMatch = clean.match(/TITLE\s*=\s*(.+)/i);
+    if (titleMatch && document.getElementById('importPatternName')) {
+      const suggestedName = titleMatch[1].trim();
+      if (suggestedName) document.getElementById('importPatternName').value = suggestedName;
+    }
 
-    // Split CSV tokens
-    const tokens = clean.split(',').map(t => t.trim().toUpperCase());
-    if (tokens.length < 2) return;
+    // Standardize INI key assignment: e.g. T1=1,4,1,50,50 -> 1,4,1,50,50
+    if (clean.includes('=')) {
+      const parts = clean.split('=');
+      const key = parts[0].trim().toUpperCase();
+      const val = parts.slice(1).join('=').trim();
+      if (/^(T\d+|PASS\d+|LAYER\d+|BAND\d+|LINE\d+)$/i.test(key) || val.includes(',')) {
+        clean = val;
+      } else {
+        return; // Ignore general settings lines
+      }
+    }
+
+    // Ignore section headers like [Pattern], [Palette]
+    if (clean.startsWith('[') && clean.endsWith(']')) return;
+
+    // Standardize delimiters (replace tabs & multiple spaces with commas if no comma present)
+    if (!clean.includes(',') && clean.includes(' ')) {
+      clean = clean.replace(/\s+/g, ',');
+    }
+
+    const tokens = clean.split(',').map(t => t.trim().toUpperCase()).filter(t => t.length > 0);
+    if (tokens.length === 0) return;
 
     let geo = "CROSS";
     let direction = "OUT";
     let passes = 4;
     let spoolIndex = parsedLayers.length % (defaultSpools.length || 1);
-    let isValidLine = false;
+    let isValid = false;
 
-    const firstToken = tokens[0];
-
-    // FORMAT A: Standard Keyword Syntax (e.g. CROSS, 50, 50, COLOR_1, OUT, 1, 4)
-    if (["CROSS", "BOX", "CHEVRON", "OFFSET", "DIAMOND", "STAR", "WRAP"].includes(firstToken)) {
-      isValidLine = true;
-      if (firstToken === "BOX") geo = "BOX";
-      else if (firstToken === "CHEVRON") geo = "CHEVRON";
-      else if (firstToken === "OFFSET") geo = "OFFSET";
+    // Case 1: First token is a named geometry keyword
+    const firstTok = tokens[0];
+    if (["CROSS", "BOX", "CHEVRON", "OFFSET", "DIAMOND", "STAR", "WRAP", "IN", "OUT"].includes(firstTok)) {
+      isValid = true;
+      if (firstTok === "BOX") geo = "BOX";
+      else if (firstTok === "CHEVRON") geo = "CHEVRON";
+      else if (firstTok === "OFFSET") geo = "OFFSET";
 
       tokens.forEach((tok, tIdx) => {
         if (tok === "IN" || tok === "OUT" || tok === "BOX") direction = tok;
-        if (tok.startsWith("COLOR_") || tok.startsWith("COL_")) {
+        if (tok.startsWith("COLOR_") || tok.startsWith("COL_") || tok.startsWith("C_") || tok.startsWith("C")) {
           const cNum = parseInt(tok.replace(/\D/g, ''));
           if (!isNaN(cNum) && cNum > 0) spoolIndex = (cNum - 1) % (defaultSpools.length || 1);
         }
@@ -2070,39 +2091,46 @@ function parseAndSaveVisualWrapScript() {
         }
       });
     }
-    // FORMAT B: ThreadCentral / Dave Boyle Numeric Table (e.g. 1, 50, 50, 1, 1, 6, 2)
-    else if (!isNaN(parseInt(firstToken))) {
-      // Numerical parameter mapping
-      const nums = tokens.map(t => parseInt(t.replace(/\D/g, ''))).filter(n => !isNaN(n));
-      if (nums.length >= 3) {
-        isValidLine = true;
+    // Case 2: Numeric signature (VisualWRAP native table format: Line, Passes, Geo, Type, etc.)
+    else {
+      const numbers = tokens.map(t => parseInt(t.replace(/\D/g, ''))).filter(n => !isNaN(n));
+      if (numbers.length >= 2) {
+        isValid = true;
 
-        // VisualWRAP geometry code: 1=Cross, 2=Box, 3=Chevron, 4=Offset
-        const geoCode = (nums.length >= 4) ? nums[3] : 1;
-        if (geoCode === 2) geo = "BOX";
-        else if (geoCode === 3) geo = "CHEVRON";
-        else if (geoCode === 4) geo = "OFFSET";
-
-        // Direction code: 1=OUT, 2=IN, 3=BOX
-        const dirCode = (nums.length >= 5) ? nums[4] : 1;
-        if (dirCode === 2) direction = "IN";
-        else if (dirCode === 3) direction = "BOX";
-
-        // Pass count is usually the 6th parameter, or last valid integer
-        if (nums.length >= 6 && nums[5] > 0) {
-          passes = nums[5];
-        } else if (nums[nums.length - 1] > 0 && nums[nums.length - 1] <= 100) {
-          passes = nums[nums.length - 1];
+        // VisualWRAP numeric geo lookup: 1=Cross, 2=Box, 3=Chevron, 4=Offset
+        if (numbers.length >= 3 && [1, 2, 3, 4].includes(numbers[2])) {
+          if (numbers[2] === 2) geo = "BOX";
+          else if (numbers[2] === 3) geo = "CHEVRON";
+          else if (numbers[2] === 4) geo = "OFFSET";
+        } else if (numbers.length >= 4 && [1, 2, 3, 4].includes(numbers[3])) {
+          if (numbers[3] === 2) geo = "BOX";
+          else if (numbers[3] === 3) geo = "CHEVRON";
+          else if (numbers[3] === 4) geo = "OFFSET";
         }
 
-        // Color index is usually 7th param
-        if (nums.length >= 7 && nums[6] > 0) {
-          spoolIndex = (nums[6] - 1) % (defaultSpools.length || 1);
+        // Direction code: 1=OUT, 2=IN, 3=BOX
+        if (numbers.length >= 4 && [1, 2, 3].includes(numbers[3])) {
+          if (numbers[3] === 2) direction = "IN";
+          else if (numbers[3] === 3) direction = "BOX";
+        }
+
+        // Pass count resolution
+        if (numbers.length >= 2 && numbers[1] > 0 && numbers[1] <= 100) {
+          passes = numbers[1];
+        } else if (numbers.length >= 6 && numbers[5] > 0 && numbers[5] <= 100) {
+          passes = numbers[5];
+        } else {
+          passes = numbers[numbers.length - 1] || 4;
+        }
+
+        // Spool color index resolution
+        if (numbers.length >= 5 && numbers[4] > 0) {
+          spoolIndex = (numbers[4] - 1) % (defaultSpools.length || 1);
         }
       }
     }
 
-    if (isValidLine) {
+    if (isValid) {
       const selectedSpool = defaultSpools[spoolIndex] || masterThreadCatalog[0];
       parsedLayers.push({
         threadId: selectedSpool.id,
@@ -2115,12 +2143,13 @@ function parseAndSaveVisualWrapScript() {
   });
 
   if (parsedLayers.length === 0) {
-    alert("Could not extract wrapping passes from this file. Please check that the file is an unencrypted VisualWRAP .vwp text script.");
+    alert("Could not extract wrapping passes from this file. Please verify the file content.");
     return;
   }
 
+  const finalName = document.getElementById('importPatternName')?.value.trim() || nameInput;
   const newPattern = {
-    name: nameInput,
+    name: finalName,
     axis: detectedAxis,
     layers: parsedLayers
   };
@@ -2139,11 +2168,11 @@ function parseAndSaveVisualWrapScript() {
   renderLayersUI();
   syncAllEngines();
 
-  // Auto-switch to workbench so user immediately sees imported animation
+  // Auto-switch to workbench to view imported pattern running
   const stepRadio = document.getElementById('t-step');
   if (stepRadio) stepRadio.checked = true;
 
-  alert(`Successfully loaded "${nameInput}" with ${parsedLayers.length} thread bands into your workbench!`);
+  alert(`Successfully loaded "${finalName}" with ${parsedLayers.length} thread bands into your workbench!`);
 }
 
 function renderPatternLibraryList() {
